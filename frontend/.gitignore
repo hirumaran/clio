@@ -1,0 +1,24 @@
+# dependencies
+/node_modules
+
+# production
+/dist
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+# typescript
+*.tsbuildinfo
+
+# editor
+.vscode
+.idea
+*.swp
+*.swo

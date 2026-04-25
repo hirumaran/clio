@@ -1,0 +1,231 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+
+  /* OffBrand-inspired palette — light */
+  --bg-base:        #D5D3CE;
+  --bg-surface:     #E5E4E0;
+  --bg-subtle:      #DAD8D3;
+  --bg-muted:       #C8C6C1;
+
+  --text-primary:   #1D1D1D;
+  --text-secondary: #444444;
+  --text-muted:     #6F6F6F;
+  --text-disabled:  #9E9E9E;
+
+  --border-default: #B0AEA9;
+  --border-strong:  #989692;
+
+  --accent:         #C45D3A;
+  --accent-hover:   #A84D2E;
+  --accent-subtle:  #F5EBE6;
+  --accent-text:    #FFFFFF;
+
+  --status-pending:   #C99856;
+  --status-approved:  #4A7C59;
+  --status-rejected:  #B04545;
+  --status-active:    #4A6FA5;
+  --status-returned:  #7A7A7A;
+  --status-overdue:   #A04040;
+
+  --spotlight-glow: rgba(255, 255, 255, 0.85);
+
+  --school-bigpicture:  #4A6B5A;
+  --school-newport:     #4A5080;
+  --school-sammamish:   #4A7C59;
+
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  8px;
+  --radius-xl:  12px;
+  --radius-full: 9999px;
+
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+
+  /* shadcn/ui compatibility bridge */
+  --background: var(--bg-base);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-text);
+  --secondary: var(--bg-subtle);
+  --secondary-foreground: var(--text-primary);
+  --muted: var(--bg-subtle);
+  --muted-foreground: var(--text-muted);
+  --accent-ui: var(--bg-subtle);
+  --accent-ui-foreground: var(--text-primary);
+  --destructive: #B04545;
+  --destructive-foreground: #FFFFFF;
+  --success: var(--status-approved);
+  --success-foreground: #FFFFFF;
+  --warning: var(--status-pending);
+  --warning-foreground: var(--text-primary);
+  --border: var(--border-default);
+  --input: var(--border-default);
+  --ring: var(--accent);
+  --radius: var(--radius-md);
+
+  --sidebar-background: var(--bg-surface);
+  --sidebar-foreground: var(--text-secondary);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: var(--accent-text);
+  --sidebar-accent: var(--bg-subtle);
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: var(--border-default);
+  --sidebar-ring: var(--accent);
+}
+
+.dark {
+  --bg-base:        #121212;
+  --bg-surface:     #1A1A1A;
+  --bg-subtle:      #222222;
+  --bg-muted:       #2E2E2E;
+
+  --text-primary:   #E5E4E0;
+  --text-secondary: #B0B0B0;
+  --text-muted:     #7A7A7A;
+  --text-disabled:  #555555;
+
+  --border-default: #2E2E2E;
+  --border-strong:  #3A3A3A;
+
+  --accent:         #D4845E;
+  --accent-hover:   #E0956E;
+  --accent-subtle:  #2E2018;
+  --accent-text:    #121212;
+
+  --spotlight-glow: rgba(255, 250, 240, 0.5);
+
+  /* shadcn bridge (dark overrides inherit from updated vars automatically) */
+  --destructive: #D66060;
+  --destructive-foreground: #E5E4E0;
+  --success: #5A8F5A;
+  --warning: #D4AC6E;
+  --warning-foreground: #121212;
+}
+
+@layer base {
+  * {
+    border-color: var(--border-default);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg-base), 0 0 0 4px var(--accent);
+  }
+}
+
+::selection {
+  background: var(--text-primary);
+  color: var(--bg-base);
+}
+
+/* ─── Editorial design utilities ─── */
+
+/* Task 1: Hollow outline text for overlapping editorial headings.
+   Uses current text color so it inverts automatically in dark mode. */
+.text-outline-stroke {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--text-primary);
+}
+
+/* Task 2: Premium watermark / logo styling for partner/school names.
+   Quiet, uppercase, widely tracked — reads as a logo rather than body copy. */
+.school-watermark {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  opacity: 0.4;
+}
+
+/* Task 3: Subtle step cards — theme-aware background. */
+.step-card {
+  background-color: var(--bg-muted);
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+.footer-graphic {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+}
+
+.footer-bg-text {
+  position: absolute;
+  font-size: 25vw;
+  white-space: nowrap;
+  -webkit-text-stroke: 2px color-mix(in srgb, var(--text-primary) 25%, transparent);
+  color: color-mix(in srgb, var(--text-primary) 6%, transparent);
+  z-index: 1;
+  user-select: none;
+  pointer-events: none;
+  line-height: 1.0;
+  font-family: 'Sanchez', serif;
+  font-weight: 400;
+}
+
+/* Spotlight glow for CTA section */
+.cta-dim-overlay {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  z-index: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.cta-spotlight-glow {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(circle, var(--spotlight-glow) 0%, rgba(255, 255, 255, 0) 70%);
+}

@@ -85,31 +85,31 @@
 }
 
 .dark {
-  --bg-base:        #121212;
-  --bg-surface:     #1A1A1A;
-  --bg-subtle:      #222222;
-  --bg-muted:       #2E2E2E;
+  --bg-base:        #000000;
+  --bg-surface:     #121212;
+  --bg-subtle:      #1A1A1A;
+  --bg-muted:       #262626;
 
-  --text-primary:   #E5E4E0;
-  --text-secondary: #B0B0B0;
-  --text-muted:     #7A7A7A;
-  --text-disabled:  #555555;
+  --text-primary:   #F2F2F2;
+  --text-secondary: #8E8E93;
+  --text-muted:     #636366;
+  --text-disabled:  #48484A;
 
-  --border-default: #2E2E2E;
-  --border-strong:  #3A3A3A;
+  --border-default: #2C2C2E;
+  --border-strong:  #3A3A3C;
 
-  --accent:         #D4845E;
-  --accent-hover:   #E0956E;
-  --accent-subtle:  #2E2018;
-  --accent-text:    #121212;
+  --accent:         #0A84FF;
+  --accent-hover:   #409CFF;
+  --accent-subtle:  #1C3D5A;
+  --accent-text:    #FFFFFF;
 
   --spotlight-glow: rgba(255, 250, 240, 0.5);
 
   /* shadcn bridge (dark overrides inherit from updated vars automatically) */
-  --destructive: #D66060;
-  --destructive-foreground: #E5E4E0;
-  --success: #5A8F5A;
-  --warning: #D4AC6E;
+  --destructive: #FF453A;
+  --destructive-foreground: #F2F2F2;
+  --success: #30D158;
+  --warning: #FF9F0A;
   --warning-foreground: #121212;
 }
 

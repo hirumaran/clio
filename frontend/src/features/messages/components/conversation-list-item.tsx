@@ -13,12 +13,11 @@ export function ConversationListItem({ conversation, active, onClick }: Conversa
   const counterpart =
     conversation.participants.find((p) => p.id === conversation.counterpartId) ??
     conversation.participants[0]
-  const presence = counterpart?.presence ?? "offline"
   const seed = counterpart?.id ?? conversation.id
   const palette = getAvatarPalette(seed)
   const initials = getInitials(counterpart?.name ?? conversation.title)
 
-  const showPresence = presence === "online" || presence === "away"
+  const isUnread = conversation.unreadCount > 0
 
   return (
     <button
@@ -26,76 +25,79 @@ export function ConversationListItem({ conversation, active, onClick }: Conversa
       onClick={onClick}
       aria-current={active ? "true" : undefined}
       className={cn(
-        "group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
-        "hover:bg-muted/60",
-        active && "bg-muted",
+        "group relative flex w-full items-center gap-3 px-4 py-3 text-left transition-colors",
+        active
+          ? "bg-[var(--accent)]"
+          : "hover:bg-[var(--bg-muted)]/[0.35]",
       )}
     >
-      {/* Active indicator bar */}
-      <span
-        aria-hidden="true"
-        className={cn(
-          "absolute left-0 top-1/2 h-8 w-0.5 -translate-y-1/2 rounded-r-full bg-[var(--accent)] transition-opacity",
-          active ? "opacity-100" : "opacity-0",
-        )}
-      />
-
-      {/* Avatar with deterministic palette */}
+      {/* Avatar */}
       <div className="relative shrink-0">
         <div
           className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-full font-mono text-[11px] font-semibold",
-            palette.bg,
-            palette.text,
+            "flex h-11 w-11 items-center justify-center rounded-full text-[13px] font-semibold transition-colors",
+            active ? "bg-white/20 text-white" : palette.bg,
+            active ? "" : palette.text,
           )}
         >
           {initials}
         </div>
-        {showPresence ? (
-          <span
-            aria-label={`${presence}`}
-            className={cn(
-              "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--bg-base)]",
-              presence === "online" && "bg-emerald-500",
-              presence === "away" && "bg-amber-500",
-            )}
-          />
-        ) : null}
+        {isUnread && !active && (
+          <span className="absolute -top-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[var(--bg-surface)] bg-[var(--accent)]" />
+        )}
       </div>
 
       {/* Body */}
       <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-sm font-medium text-foreground">{conversation.title}</p>
-          <div className="flex shrink-0 items-center gap-1.5">
-            {conversation.pinned ? (
-              <Pin
-                className="h-3 w-3 -rotate-45 fill-muted-foreground/50 text-muted-foreground/70"
-                aria-label="Pinned"
-              />
-            ) : null}
-            <time className="text-[10px] tabular-nums text-muted-foreground">
-              {relativeTimeShort(conversation.lastMessageAt)}
-            </time>
-          </div>
-        </div>
-        <div className="mt-0.5 flex items-center justify-between gap-2">
+        <div className="flex items-baseline justify-between gap-2">
           <p
             className={cn(
-              "truncate text-xs",
-              conversation.unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground",
+              "truncate text-[14px] font-semibold leading-tight",
+              active ? "text-white" : isUnread ? "text-foreground" : "text-foreground/80",
+            )}
+          >
+            {conversation.title}
+          </p>
+          <time
+            className={cn(
+              "shrink-0 text-[11px] tabular-nums",
+              active
+                ? "text-white/60"
+                : isUnread
+                  ? "text-[var(--accent)]"
+                  : "text-muted-foreground/60",
+            )}
+          >
+            {relativeTimeShort(conversation.lastMessageAt)}
+          </time>
+        </div>
+        <div className="mt-1 flex items-center justify-between gap-2">
+          <p
+            className={cn(
+              "truncate text-[13px] leading-snug",
+              active
+                ? "text-white/70"
+                : isUnread
+                  ? "font-medium text-foreground"
+                  : "text-muted-foreground/70",
             )}
           >
             {conversation.lastMessagePreview}
           </p>
-          {conversation.unreadCount > 0 ? (
-            <span
-              aria-label={`${conversation.unreadCount} unread`}
-              className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-[var(--accent)] px-1 text-[10px] font-medium text-[var(--accent-text)]"
-            >
-              {conversation.unreadCount}
-            </span>
-          ) : null}
+          <div className="flex items-center gap-1 shrink-0">
+            {isUnread && (
+              <span className="flex h-2 w-2 rounded-full bg-[var(--accent)]" />
+            )}
+            {conversation.pinned && (
+              <Pin
+                className={cn(
+                  "h-3 w-3 -rotate-45",
+                  active ? "text-white/40" : "text-muted-foreground/30",
+                )}
+                aria-label="Pinned"
+              />
+            )}
+          </div>
         </div>
       </div>
     </button>

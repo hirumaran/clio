@@ -1,4 +1,4 @@
-import { ArrowLeft, MoreHorizontal, Phone, Video } from "lucide-react"
+import { ArrowLeft, MoreHorizontal } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Conversation } from "../types"
 import { getAvatarPalette, getInitials } from "../lib/avatar"
@@ -13,93 +13,61 @@ export function ChatHeader({ conversation, onBack }: ChatHeaderProps) {
     conversation.participants.find((p) => p.id === conversation.counterpartId) ??
     conversation.participants[0]
   const presence = counterpart?.presence ?? "offline"
-  const presenceLabel =
-    presence === "online" ? "Active now" : presence === "away" ? "Away" : "Offline"
   const palette = getAvatarPalette(counterpart?.id ?? conversation.id)
   const initials = getInitials(counterpart?.name ?? conversation.title)
-  const showPresence = presence === "online" || presence === "away"
+
+  const presenceLabel =
+    presence === "online"
+      ? "Active now"
+      : presence === "away"
+        ? "Away"
+        : "Offline"
 
   return (
-    <header className="flex items-center gap-3 border-b border-border/50 bg-[var(--bg-surface)] px-4 py-3.5 backdrop-blur-sm sm:px-5 sm:py-4">
+    <header className="flex items-center gap-3 border-b border-border/20 bg-[var(--bg-base)] px-4 py-3">
       {/* Mobile back button */}
       {onBack ? (
         <button
           type="button"
           onClick={onBack}
-          className="-ml-1 shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
+          className="-ml-1 shrink-0 rounded-full p-2 text-[var(--accent)] transition-colors hover:bg-[var(--bg-muted)]/50 md:hidden"
           aria-label="Back to conversations"
           title="Back"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-5 w-5" />
         </button>
       ) : null}
 
       {/* Identity */}
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        <div className="relative shrink-0">
-          <div
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full font-mono text-[11px] font-semibold",
-              palette.bg,
-              palette.text,
-            )}
-          >
-            {initials}
-          </div>
-          {showPresence ? (
-            <span
-              aria-hidden="true"
-              className={cn(
-                "absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-[var(--bg-surface)]",
-                presence === "online" && "bg-emerald-500",
-                presence === "away" && "bg-amber-500",
-              )}
-            />
-          ) : null}
+      <div className="flex flex-1 items-center gap-3">
+        <div
+          className={cn(
+            "flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-semibold",
+            palette.bg,
+            palette.text,
+          )}
+        >
+          {initials}
         </div>
-        <div className="min-w-0 leading-tight">
-          <p className="truncate text-sm font-semibold text-foreground">{conversation.title}</p>
-          <p className="mt-0.5 flex items-center gap-1.5 truncate font-mono text-[11px] text-muted-foreground">
-            <span className="truncate">{counterpart?.school ?? "StageShare"}</span>
-            <span aria-hidden="true">·</span>
-            <span
-              className={cn(
-                "truncate",
-                presence === "online" && "text-emerald-600",
-                presence === "away" && "text-amber-600",
-              )}
-            >
-              {presenceLabel}
-            </span>
+        <div className="flex flex-col justify-center">
+          <p className="text-[14px] font-semibold leading-tight text-foreground">
+            {conversation.title}
+          </p>
+          <p className="text-[12px] leading-tight text-muted-foreground/70">
+            {presenceLabel}
           </p>
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex shrink-0 items-center gap-0.5">
+      <div className="flex shrink-0 items-center">
         <button
           type="button"
-          className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          aria-label="Voice call"
-          title="Voice call"
+          className="rounded-full p-2 text-muted-foreground/70 transition-colors hover:bg-[var(--bg-muted)]/50 hover:text-[var(--accent)]"
+          aria-label="Details"
+          title="Details"
         >
-          <Phone className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          className="hidden rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:block"
-          aria-label="Video call"
-          title="Video call"
-        >
-          <Video className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          aria-label="More options"
-          title="More options"
-        >
-          <MoreHorizontal className="h-4 w-4" />
+          <MoreHorizontal className="h-5 w-5" />
         </button>
       </div>
     </header>

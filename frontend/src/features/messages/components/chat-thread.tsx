@@ -5,6 +5,8 @@ import { MessageBubble } from "./message-bubble"
 import type { MessageGroup } from "../hooks/use-messages"
 import type { Conversation } from "../types"
 import { appCurrentUser } from "../lib/seed-data"
+import { getAvatarPalette, getInitials } from "../lib/avatar"
+import { cn } from "@/lib/utils"
 
 interface ChatThreadProps {
   conversation: Conversation
@@ -23,11 +25,11 @@ export function ChatThread({ conversation, groups, typingUserName }: ChatThreadP
   return (
     <div
       ref={scrollContainerRef}
-      className="flex-1 overflow-y-auto px-4 pb-2 pt-6 sm:px-6"
+      className="flex-1 overflow-y-auto px-4 pb-4 pt-2"
       aria-live="polite"
       aria-label={`Messages in ${conversation.title}`}
     >
-      <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col justify-end">
+      <div className="mx-auto flex min-h-full w-full max-w-2xl flex-col justify-end">
         {groups.map((group) => (
           <section key={group.dayKey} className="flex flex-col">
             <DateSeparator label={group.label} />
@@ -36,13 +38,28 @@ export function ChatThread({ conversation, groups, typingUserName }: ChatThreadP
               const next = group.messages[idx + 1]
               const isHead = !prev || prev.senderId !== message.senderId
               const isTail = !next || next.senderId !== message.senderId
+              const mine = message.senderId === appCurrentUser.id
+
+              // Avatar info for received messages
+              let avatarInfo: { initials: string; palette: ReturnType<typeof getAvatarPalette> } | null = null
+              if (!mine) {
+                const sender = conversation.participants.find((p) => p.id === message.senderId)
+                if (sender) {
+                  avatarInfo = {
+                    initials: getInitials(sender.name),
+                    palette: getAvatarPalette(sender.id),
+                  }
+                }
+              }
+
               return (
-                <div key={message.id} className={isHead ? "mt-3" : "mt-0.5"}>
+                <div key={message.id} className={isHead ? "mt-4" : "mt-0.5"}>
                   <MessageBubble
                     message={message}
-                    mine={message.senderId === appCurrentUser.id}
+                    mine={mine}
                     isHead={isHead}
                     isTail={isTail}
+                    avatarInfo={avatarInfo}
                   />
                 </div>
               )
@@ -55,17 +72,14 @@ export function ChatThread({ conversation, groups, typingUserName }: ChatThreadP
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.15 }}
-            className="mt-3 flex items-center gap-2 pl-1"
+            className="mt-4 flex items-center gap-2 pl-1"
             aria-label={`${typingUserName} is typing`}
           >
-            <div className="flex items-center gap-1 rounded-2xl border border-border/40 bg-[var(--bg-subtle)] px-3 py-2">
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
-              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground" />
+            <div className="flex items-center gap-1 rounded-[18px] bg-[var(--bg-muted)]/70 px-3.5 py-2.5">
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.3s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.15s]" />
+              <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/60" />
             </div>
-            <p className="font-mono text-[11px] text-muted-foreground">
-              {typingUserName} is typing…
-            </p>
           </motion.div>
         ) : null}
 

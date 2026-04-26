@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom"
+import { Outlet, useLocation } from "react-router-dom"
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
 import { useUIStore } from "@/stores/ui-store"
@@ -6,6 +6,9 @@ import { cn } from "@/lib/utils"
 
 export default function AppShell() {
   const { sidebarOpen, sidebarCollapsed } = useUIStore()
+  const { pathname } = useLocation()
+
+  const isMessages = pathname.startsWith("/messages")
 
   return (
     <div className="flex h-screen bg-background">
@@ -13,13 +16,24 @@ export default function AppShell() {
 
       <div
         className={cn(
-          "flex flex-1 flex-col transition-[margin] duration-200",
-          sidebarOpen && !sidebarCollapsed && "lg:ml-60",
-          sidebarOpen && sidebarCollapsed && "lg:ml-14"
+          "flex flex-1 flex-col transition-[margin] duration-300 ease-in-out",
+          isMessages
+            ? "lg:ml-0"
+            : [
+                sidebarOpen && !sidebarCollapsed && "lg:ml-60",
+                sidebarOpen && sidebarCollapsed && "lg:ml-0",
+              ],
         )}
       >
-        <Header />
-        <main className="flex-1 overflow-auto p-4 lg:p-6">
+        {!isMessages && <Header />}
+        <main
+          className={cn(
+            "flex-1",
+            isMessages
+              ? "relative overflow-hidden"
+              : "overflow-auto p-4 lg:p-6",
+          )}
+        >
           <Outlet />
         </main>
       </div>

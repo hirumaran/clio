@@ -55,65 +55,63 @@ export default function MessagesPage() {
   }, [urlConversationId, activeConversationId, setActiveConversation])
 
   return (
-    <div className="flex h-full w-full flex-col">
-      <div className="flex h-full w-full overflow-hidden rounded-lg">
-        {/* Left: Conversation list — slightly lighter */}
-        <div
-          className={cn(
-            "flex flex-col border-r border-border bg-[var(--bg-surface)]",
-            activeConversationId
-              ? "hidden md:flex md:w-[340px]"
-              : "flex w-full md:w-[340px]",
-          )}
-        >
-          <ConversationListPane
-            conversations={conversations}
-            activeConversationId={activeConversationId}
-            onSelect={setActiveConversation}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            totalUnread={totalUnread}
-          />
-        </div>
+    <div className="absolute inset-0 flex overflow-hidden">
+      {/* Left: Conversation list */}
+      <div
+        className={cn(
+          "flex flex-col border-r border-border/50 bg-[var(--bg-surface)] transition-all duration-300 ease-in-out",
+          activeConversationId
+            ? "hidden md:flex md:w-[340px]"
+            : "flex w-full md:w-[340px]",
+        )}
+      >
+        <ConversationListPane
+          conversations={conversations}
+          activeConversationId={activeConversationId}
+          onSelect={setActiveConversation}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          totalUnread={totalUnread}
+        />
+      </div>
 
-        {/* Right: Chat thread — darkest */}
-        <div
-          className={cn(
-            "flex h-full min-w-0 flex-1 flex-col bg-[var(--bg-base)]",
-            activeConversationId ? "flex" : "hidden md:flex",
+      {/* Right: Chat thread */}
+      <div
+        className={cn(
+          "relative flex h-full min-w-0 flex-1 flex-col bg-[var(--bg-base)]",
+          activeConversationId ? "flex" : "hidden md:flex",
+        )}
+      >
+        <AnimatePresence mode="wait">
+          {activeConversation ? (
+            <motion.div
+              key="thread"
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 16 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              className="flex h-full flex-col"
+            >
+              <ChatHeader
+                conversation={activeConversation}
+                onBack={() => setActiveConversation(null)}
+              />
+              <ChatThread
+                conversation={activeConversation}
+                groups={grouped}
+                typingUserName={typingUserName}
+              />
+              <MessageInput
+                onSend={(content) =>
+                  sendMessage(activeConversation.id, content)
+                }
+                placeholder={`Message ${activeConversation.title.split(" ")[0]}`}
+              />
+            </motion.div>
+          ) : (
+            <EmptyState key="empty" />
           )}
-        >
-          <AnimatePresence mode="wait">
-            {activeConversation ? (
-              <motion.div
-                key="thread"
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 16 }}
-                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-                className="flex h-full flex-col"
-              >
-                <ChatHeader
-                  conversation={activeConversation}
-                  onBack={() => setActiveConversation(null)}
-                />
-                <ChatThread
-                  conversation={activeConversation}
-                  groups={grouped}
-                  typingUserName={typingUserName}
-                />
-                <MessageInput
-                  onSend={(content) =>
-                    sendMessage(activeConversation.id, content)
-                  }
-                  placeholder={`Message ${activeConversation.title.split(" ")[0]}`}
-                />
-              </motion.div>
-            ) : (
-              <EmptyState key="empty" />
-            )}
-          </AnimatePresence>
-        </div>
+        </AnimatePresence>
       </div>
     </div>
   )

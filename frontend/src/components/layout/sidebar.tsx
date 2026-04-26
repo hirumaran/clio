@@ -124,6 +124,7 @@ export function Sidebar() {
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
           sidebarCollapsed ? "w-16" : "w-60",
           "lg:translate-x-0",
+          "border-r border-[#27272A]"
         )}
       >
         {sidebarCollapsed ? (
@@ -136,7 +137,7 @@ export function Sidebar() {
               <button
                 type="button"
                 onClick={() => setSidebarCollapsed(false)}
-                className="flex h-11 w-11 items-center justify-center rounded-xl text-[#6366F1] transition-colors hover:bg-[#27272A]"
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-primary transition-colors hover:bg-[#27272A]"
                 aria-label="Open sidebar"
               >
                 <Theater className="h-5 w-5" strokeWidth={1.5} />

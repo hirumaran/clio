@@ -19,6 +19,5 @@ __pycache__/
 *.pyc
 .claude/worktrees/
 
-/antigravitycli/
+/.antigravitycli/
 synapse/data/
-

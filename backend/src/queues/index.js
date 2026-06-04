@@ -21,4 +21,16 @@ const notificationQueue = new Queue('notifications', {
   },
 });
 
-module.exports = { matrixQueue, notificationQueue };
+const cleanupQueue = new Queue('cleanup', { connection: redis });
+
+// Schedule the purge to run every 24 hours.
+// BullMQ deduplicates repeating jobs by jobId so this is safe to call on every startup.
+cleanupQueue.add(
+  'purge-expired-refresh-tokens',
+  {},
+  { repeat: { every: 24 * 60 * 60 * 1000 } }
+).catch((err) => {
+  console.error('[Cleanup] Failed to schedule repeating job:', err.message);
+});
+
+module.exports = { matrixQueue, notificationQueue, cleanupQueue };

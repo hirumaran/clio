@@ -19,7 +19,11 @@ function authenticateToken(req, res, next) {
     if (err) {
       return res.status(403).json({ error: 'Invalid or expired token' });
     }
+    // Normalize claim shape — JWT signs { id, schoolId, role } but legacy
+    // controllers may still read req.user.userId. Set both for compat.
     req.user = decoded;
+    req.user.id = decoded.id;
+    req.user.userId = decoded.id;
     next();
   });
 }

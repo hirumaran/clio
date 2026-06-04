@@ -1,15 +1,16 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { query } = require('../config/db');
 const { regenerateMatrixToken } = require('../utils/matrix');
 const { matrixQueue } = require('../queues');
-
-const JWT_SECRET = process.env.JWT_SECRET;
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
-
-function signToken(payload) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-}
+const {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+  revokeRefreshToken,
+  revokeAllUserTokens,
+} = require('../utils/tokens');
+const { sendPasswordResetEmail } = require('../utils/email');
 
 /**
  * POST /api/v1/auth/register
@@ -52,10 +53,16 @@ async function register(req, res) {
       console.error('[Matrix] Failed to enqueue provisioning job:', queueErr.message);
     }
 
-    const token = signToken({ userId: user.id, email: user.email, role: user.role, schoolId: user.school_id });
+    const accessToken = generateAccessToken(user.id, user.school_id, user.role);
+    const refreshToken = await generateRefreshToken(
+      user.id,
+      req.headers['user-agent'] ?? null
+    );
 
     res.status(201).json({
-      token,
+      token: accessToken,
+      refreshToken,
+      expiresIn: 15 * 60,
       user: {
         id: user.id,
         email: user.email,
@@ -106,10 +113,19 @@ async function login(req, res) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = signToken({ userId: user.id, email: user.email, role: user.role, schoolId: user.school_id });
+    // Track last login timestamp
+    await query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+
+    const accessToken = generateAccessToken(user.id, user.school_id, user.role);
+    const refreshToken = await generateRefreshToken(
+      user.id,
+      req.headers['user-agent'] ?? null
+    );
 
     res.status(200).json({
-      token,
+      token: accessToken,
+      refreshToken,
+      expiresIn: 15 * 60,
       user: {
         id: user.id,
         email: user.email,
@@ -128,6 +144,72 @@ async function login(req, res) {
   } catch (err) {
     console.error('[Auth] Login error:', err);
     res.status(500).json({ error: 'Login failed' });
+  }
+}
+
+/**
+ * POST /api/v1/auth/refresh
+ * Token rotation: revoke old refresh token, issue new access + refresh pair.
+ * No authenticateToken middleware — the refresh token itself is the credential.
+ */
+async function refreshToken(req, res) {
+  try {
+    const { refreshToken: rawToken } = req.body;
+
+    if (!rawToken) {
+      return res.status(400).json({ error: 'Refresh token required' });
+    }
+
+    const tokenRecord = await verifyRefreshToken(rawToken);
+
+    if (!tokenRecord) {
+      return res.status(401).json({ error: 'Invalid or expired refresh token' });
+    }
+
+    if (!tokenRecord.is_active) {
+      return res.status(401).json({ error: 'Account deactivated' });
+    }
+
+    // Rotate: revoke old token, issue new pair
+    await revokeRefreshToken(rawToken);
+
+    const newAccessToken = generateAccessToken(
+      tokenRecord.user_id,
+      tokenRecord.school_id,
+      tokenRecord.role
+    );
+    const newRefreshToken = await generateRefreshToken(
+      tokenRecord.user_id,
+      req.headers['user-agent'] ?? null
+    );
+
+    return res.status(200).json({
+      token: newAccessToken,
+      refreshToken: newRefreshToken,
+      expiresIn: 15 * 60,
+    });
+  } catch (err) {
+    console.error('[Auth] Refresh error:', err);
+    return res.status(500).json({ error: 'Token refresh failed' });
+  }
+}
+
+/**
+ * POST /api/v1/auth/logout
+ * Revokes the supplied refresh token. No-ops gracefully if token is absent or already revoked.
+ */
+async function logout(req, res) {
+  try {
+    const { refreshToken: rawToken } = req.body;
+
+    if (rawToken) {
+      await revokeRefreshToken(rawToken).catch(() => {});
+    }
+
+    return res.status(200).json({ message: 'Logged out' });
+  } catch (err) {
+    console.error('[Auth] Logout error:', err);
+    return res.status(500).json({ error: 'Logout failed' });
   }
 }
 
@@ -204,4 +286,121 @@ async function refreshMatrix(req, res) {
   }
 }
 
-module.exports = { register, login, me, refreshMatrix };
+/**
+ * POST /api/v1/auth/forgot-password
+ * Always returns 200 — never reveals whether the email exists (anti-enumeration).
+ */
+async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email required' });
+    }
+
+    const { rows } = await query(
+      `SELECT id FROM users WHERE email = $1 AND is_active = TRUE`,
+      [email.toLowerCase()]
+    );
+
+    if (rows.length > 0) {
+      const userId = rows[0].id;
+      const rawToken = crypto.randomBytes(32).toString('hex');
+      const tokenHash = crypto
+        .createHash('sha256')
+        .update(rawToken)
+        .digest('hex');
+
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      // Invalidate any existing unused reset tokens for this user
+      await query(
+        `UPDATE password_reset_tokens SET used = TRUE 
+         WHERE user_id = $1 AND used = FALSE`,
+        [userId]
+      );
+
+      await query(
+        `INSERT INTO password_reset_tokens 
+           (user_id, token_hash, expires_at)
+         VALUES ($1, $2, $3)`,
+        [userId, tokenHash, expiresAt]
+      );
+
+      // Fire and forget — don't block response on email delivery
+      sendPasswordResetEmail(email, rawToken).catch((err) => {
+        console.error('[Email] Password reset send failed:', err.message);
+      });
+    }
+
+    // Always same response — no enumeration
+    return res.status(200).json({
+      message: 'If that email exists, a reset link has been sent.',
+    });
+  } catch (err) {
+    console.error('[Auth] Forgot password error:', err);
+    return res.status(500).json({ error: 'Failed to process request' });
+  }
+}
+
+/**
+ * POST /api/v1/auth/reset-password
+ */
+async function resetPassword(req, res) {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: 'token and newPassword required' });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        error: 'Password must be at least 8 characters',
+      });
+    }
+
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    const { rows } = await query(
+      `SELECT prt.user_id
+       FROM password_reset_tokens prt
+       WHERE prt.token_hash = $1
+         AND prt.used = FALSE
+         AND prt.expires_at > NOW()`,
+      [tokenHash]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired reset token' });
+    }
+
+    const userId = rows[0].user_id;
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+
+    await query(
+      `UPDATE users SET password_hash = $1 WHERE id = $2`,
+      [passwordHash, userId]
+    );
+
+    // Mark token as used
+    await query(
+      `UPDATE password_reset_tokens SET used = TRUE 
+       WHERE token_hash = $1`,
+      [tokenHash]
+    );
+
+    // Revoke all refresh tokens — forces re-login on all devices after reset
+    await revokeAllUserTokens(userId).catch(() => {});
+
+    return res.status(200).json({ message: 'Password reset successfully' });
+  } catch (err) {
+    console.error('[Auth] Reset password error:', err);
+    return res.status(500).json({ error: 'Failed to reset password' });
+  }
+}
+
+module.exports = { register, login, refreshToken, logout, me, refreshMatrix, forgotPassword, resetPassword };

@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "rootDir": ".",
+    "outDir": "dist-harness",
+    "noEmit": false,
+    "declaration": false,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": false,
+    "strict": false,
+    "ignoreDeprecations": "6.0",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "jsx": "react"
+  },
+  "include": [
+    "src/types/**/*",
+    "src/lib/config.ts",
+    "src/lib/api.ts",
+    "src/lib/secure-store.ts",
+    "src/stores/auth-store.ts",
+    "src/stores/index.ts"
+  ]
+}

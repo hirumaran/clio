@@ -1,24 +1,11 @@
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
 
-interface LoadingStateProps {
-  message?: string;
-}
-
-export function LoadingState({ message }: LoadingStateProps) {
-  const theme = useTheme();
-
+export function LoadingState() {
   return (
     <View style={styles.container}>
-      <ActivityIndicator color={theme.textSecondary} />
-      {message ? (
-        <ThemedText type="small" themeColor="textSecondary">
-          {message}
-        </ThemedText>
-      ) : null}
+      <View style={styles.dot} />
     </View>
   );
 }
@@ -28,6 +15,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: Spacing.three,
+    backgroundColor: '#ffffff',
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#6B1E2E',
   },
 });

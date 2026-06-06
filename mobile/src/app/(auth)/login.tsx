@@ -1,17 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 
-import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/Button';
 import { TextInput } from '@/components/ui/TextInput';
-import { SemanticColors, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { Spacing } from '@/constants/theme';
 import { useAuthStore } from '@/stores';
 
 export default function LoginScreen() {
-  const theme = useTheme();
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const clearError = useAuthStore((state) => state.clearError);
@@ -49,17 +53,16 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={[styles.flex, { backgroundColor: theme.background }]}
+      style={styles.flex}
     >
-      <SafeAreaView style={[styles.flex, { backgroundColor: theme.background }]} edges={['top', 'bottom']}>
-        <View style={styles.container}>
+      <SafeAreaView style={styles.flex} edges={['top', 'bottom']}>
+        <View style={styles.root}>
           <View style={styles.header}>
-            <ThemedText type="title" style={{ textAlign: 'center' }}>
-              Skēnē
-            </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary" style={{ textAlign: 'center' }}>
-              Sign in to your account
-            </ThemedText>
+            <View style={styles.brandMark}>
+              <View style={styles.brandDot} />
+              <Text style={styles.brandText}>Skēnē</Text>
+            </View>
+            <Text style={styles.subtitle}>Sign in</Text>
           </View>
 
           <View style={styles.form}>
@@ -69,13 +72,13 @@ export default function LoginScreen() {
               editable={!isLoading}
               inputMode="email"
               keyboardType="email-address"
-              label="Email"
               onChangeText={(value) => {
                 setEmail(value);
                 setLocalError(null);
                 clearError();
               }}
-              placeholder="you@school.edu"
+              placeholder="Email"
+              placeholderTextColor="#8F9198"
               returnKeyType="next"
               textContentType="emailAddress"
               value={email}
@@ -84,14 +87,14 @@ export default function LoginScreen() {
               autoCapitalize="none"
               autoCorrect={false}
               editable={!isLoading}
-              label="Password"
               onChangeText={(value) => {
                 setPassword(value);
                 setLocalError(null);
                 clearError();
               }}
               onSubmitEditing={handleLogin}
-              placeholder="••••••••"
+              placeholder="Password"
+              placeholderTextColor="#8F9198"
               returnKeyType="go"
               secureTextEntry
               textContentType="password"
@@ -99,9 +102,7 @@ export default function LoginScreen() {
             />
 
             {errorText ? (
-              <ThemedText type="small" style={styles.errorText}>
-                {errorText}
-              </ThemedText>
+              <Text style={styles.errorText}>{errorText}</Text>
             ) : null}
 
             <Button
@@ -112,18 +113,12 @@ export default function LoginScreen() {
             />
           </View>
 
-          <View style={styles.footer}>
-            <ThemedText type="small" themeColor="textSecondary">
-              Don&apos;t have an account?{' '}
-            </ThemedText>
-            <Link href="/register" asChild>
-              <Pressable>
-                <ThemedText type="small" style={{ color: SemanticColors.accent, fontWeight: '700' }}>
-                  Sign up
-                </ThemedText>
-              </Pressable>
-            </Link>
-          </View>
+          <Pressable
+            onPress={() => router.back()}
+            style={styles.backLink}
+          >
+            <Text style={styles.backLinkText}>← Back to sign in options</Text>
+          </Pressable>
         </View>
       </SafeAreaView>
     </KeyboardAvoidingView>
@@ -134,27 +129,55 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
-  container: {
+  root: {
     flex: 1,
-    justifyContent: 'center',
+    backgroundColor: '#ffffff',
     paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.five,
+    paddingBottom: Spacing.four,
     gap: Spacing.five,
   },
   header: {
-    gap: Spacing.two,
+    gap: Spacing.three,
     alignItems: 'center',
+  },
+  brandMark: {
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  brandDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#6B1E2E',
+  },
+  brandText: {
+    fontSize: 28,
+    fontWeight: '600',
+    color: '#050505',
+    letterSpacing: -0.5,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#8F9198',
+    fontWeight: '500',
   },
   form: {
     gap: Spacing.three,
   },
   errorText: {
-    color: SemanticColors.danger,
+    color: '#b42318',
+    fontSize: 14,
+    fontWeight: '500',
     textAlign: 'center',
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  backLink: {
     alignItems: 'center',
-    paddingBottom: Spacing.three,
+    paddingTop: Spacing.two,
+  },
+  backLinkText: {
+    fontSize: 14,
+    color: '#8F9198',
+    fontWeight: '500',
   },
 });

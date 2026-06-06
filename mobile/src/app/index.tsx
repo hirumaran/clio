@@ -67,12 +67,12 @@ export default function Index() {
   }, [hasHydrated, isAuthenticated, isReady]);
 
   if (!isReady) {
-    return <LoadingState message="Starting up..." />;
+    return <LoadingState />;
   }
 
   if (!isAuthenticated) {
-    console.log('[startup] redirecting → /(auth)/login');
-    return <Redirect href="/(auth)/login" />;
+    console.log('[startup] redirecting → /(auth)');
+    return <Redirect href="/(auth)" />;
   }
 
   console.log('[startup] redirecting → /(tabs)/catalogue');

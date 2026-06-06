@@ -35,9 +35,8 @@ export default function ProfileScreen() {
 
   const handleLogout = useCallback(async () => {
     await logout();
-    // Router will naturally redirect because auth state changes and tabs layout guards it,
-    // but explicit replace avoids any intermediate render.
-    router.replace('/(auth)/login');
+    // Explicit replace to auth landing to avoid intermediate render
+    router.replace('/(auth)');
   }, [logout, router]);
 
   if (!user) {

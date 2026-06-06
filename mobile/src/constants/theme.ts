@@ -63,3 +63,43 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+// ---------------------------------------------------------------------------
+// Semantic tokens — MVP 0 mobile design system
+// ---------------------------------------------------------------------------
+
+export const SemanticColors = {
+  accent: '#6B1E2E',
+  accentSoft: '#9e4a5c',
+  gold: '#C9A84C',
+  danger: '#b42318',
+  success: '#1a7f37',
+  warning: '#b35900',
+} as const;
+
+export const SurfaceColors = {
+  light: {
+    surface: '#F7F7F8',
+    surfaceElevated: '#ffffff',
+    border: '#E0E1E6',
+    borderSubtle: '#F0F0F3',
+    textPrimary: '#000000',
+    textSecondary: '#60646C',
+    textTertiary: '#8F9198',
+    overlay: 'rgba(0,0,0,0.04)',
+  },
+  dark: {
+    surface: '#16171A',
+    surfaceElevated: '#212225',
+    border: '#2E3135',
+    borderSubtle: '#212225',
+    textPrimary: '#ffffff',
+    textSecondary: '#B0B4BA',
+    textTertiary: '#6C6F76',
+    overlay: 'rgba(255,255,255,0.04)',
+  },
+} as const;
+
+export function useSurfaceColors(scheme: 'light' | 'dark') {
+  return SurfaceColors[scheme];
+}

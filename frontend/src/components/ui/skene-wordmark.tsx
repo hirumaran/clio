@@ -1,19 +1,47 @@
 import { cn } from "@/lib/utils"
 
 const glyphs = {
-  S: [
-    "11111",
+  C: [
+    "01110",
+    "10001",
     "10000",
-    "11110",
-    "00001",
-    "11110",
+    "10001",
+    "01110",
   ],
-  K: [
+  A: [
+    "01110",
     "10001",
-    "10010",
-    "11100",
-    "10010",
+    "11111",
     "10001",
+    "10001",
+  ],
+  L: [
+    "10000",
+    "10000",
+    "10000",
+    "10000",
+    "11111",
+  ],
+  I: [
+    "11111",
+    "00100",
+    "00100",
+    "00100",
+    "11111",
+  ],
+  O: [
+    "01110",
+    "10001",
+    "10001",
+    "10001",
+    "01110",
+  ],
+  P: [
+    "11110",
+    "10001",
+    "11110",
+    "10000",
+    "10000",
   ],
   E: [
     "11111",
@@ -22,21 +50,17 @@ const glyphs = {
     "10000",
     "11111",
   ],
-  N: [
-    "10001",
-    "11001",
-    "10101",
-    "10011",
-    "10001",
-  ],
 } as const
 
 const wordmark = [
-  { glyph: "S", accented: false },
-  { glyph: "K", accented: false },
-  { glyph: "E", accented: true },
-  { glyph: "N", accented: false },
-  { glyph: "E", accented: true },
+  { glyph: "C", accented: false },
+  { glyph: "A", accented: false },
+  { glyph: "L", accented: false },
+  { glyph: "L", accented: false },
+  { glyph: "I", accented: false },
+  { glyph: "O", accented: false },
+  { glyph: "P", accented: false },
+  { glyph: "E", accented: false },
 ] as const
 
 const dotRadius = 2.55
@@ -49,21 +73,21 @@ const viewBoxWidth =
 const viewBoxHeight = dotRadius * 2 + 5 * dotPitch
 const macron = "01110"
 
-interface SkeneWordmarkProps {
+interface CalliopeWordmarkProps {
   className?: string
 }
 
-export function SkeneWordmark({ className }: SkeneWordmarkProps) {
+export function CalliopeWordmark({ className }: CalliopeWordmarkProps) {
   return (
     <svg
-      aria-label="Skēnē"
+      aria-label="Calliope"
       className={cn("h-full w-full fill-current", className)}
       focusable="false"
       role="img"
       shapeRendering="geometricPrecision"
       viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
     >
-      <title>Skēnē</title>
+      <title>Calliope</title>
       {wordmark.flatMap((letter, letterIndex) => {
         const xOffset = letterIndex * (glyphWidth + letterGap)
         const rows = [

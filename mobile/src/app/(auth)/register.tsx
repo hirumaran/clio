@@ -83,7 +83,7 @@ export default function RegisterScreen() {
 
           <AuthHeading theme={theme}>Create an account</AuthHeading>
           <AuthSubtext theme={theme}>
-            Set up your Skēnē account to continue
+            Set up your Calliope account to continue
           </AuthSubtext>
 
           <View style={styles.form}>

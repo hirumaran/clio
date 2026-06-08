@@ -11,7 +11,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder:          'skene_items',
+    folder:          'calliope_items',
     allowed_formats: ['jpg', 'png', 'webp'],
     transformation:  [{ quality: 'auto', fetch_format: 'auto' }],
   },

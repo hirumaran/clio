@@ -66,7 +66,7 @@ export function AppearanceSection({
 
       <SectionGroup
         title="Theme"
-        description="Choose how Skēnē renders the settings interface and dashboard surfaces."
+        description="Choose how Calliope renders the settings interface and dashboard surfaces."
       >
         <div className="grid gap-3 md:grid-cols-3">
           {themeOptions.map((option) => {

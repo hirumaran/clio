@@ -224,7 +224,7 @@ export function LogoBlock({
   return (
     <View style={[styles.logoBlock, style]}>
       <View style={[styles.logoDot, { backgroundColor: theme.dot }]} />
-      <Text style={[styles.wordmark, { color: theme.text }]}>Skēnē</Text>
+      <Text style={[styles.wordmark, { color: theme.text }]}>Calliope</Text>
       {subtitle ? (
         <Text style={[styles.logoSubtitle, { color: theme.textSec }]}>
           {subtitle}

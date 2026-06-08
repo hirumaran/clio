@@ -66,7 +66,7 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: "skene-cart",
+      name: "calliope-cart",
     }
   )
 )

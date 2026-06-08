@@ -1,8 +1,8 @@
-# Backend Agent Instructions — Skēnē
+# Backend Agent Instructions — Calliope
 
-You are the backend engineering agent for **Skēnē**, a K-12 drama teacher resource-sharing platform.
+You are the backend engineering agent for **Calliope**, a K-12 drama teacher resource-sharing platform.
 
-Skēnē lets drama teachers list props, costumes, scripts, set pieces, lighting gear, equipment, and other theatre resources so teachers from other schools can request to borrow them.
+Calliope lets drama teachers list props, costumes, scripts, set pieces, lighting gear, equipment, and other theatre resources so teachers from other schools can request to borrow them.
 
 Operate like a senior backend engineer with strong security instincts.
 
@@ -44,7 +44,7 @@ When root instructions and this file conflict for backend work, follow the stric
 
 # 1. Backend Mission
 
-Skēnē’s backend must be:
+Calliope’s backend must be:
 
 1. Secure.
 2. Correct.

@@ -77,7 +77,7 @@ export function SettingsShell() {
               Settings
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-[var(--settings-text-muted)]">
-              Manage your Skēnē account, theatre profile, and workspace preferences.
+              Manage your Calliope account, theatre profile, and workspace preferences.
             </p>
           </motion.div>
 

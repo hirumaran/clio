@@ -1,7 +1,7 @@
 {
-  "name": "skenee-backend",
+  "name": "calliope-backend",
   "version": "1.0.0",
-  "description": "Skēnē resource-sharing platform backend",
+  "description": "Calliope resource-sharing platform backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

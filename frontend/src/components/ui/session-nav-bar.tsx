@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { SkeneWordmark } from "@/components/ui/skene-wordmark"
+import { CalliopeWordmark } from "@/components/ui/skene-wordmark"
 import { currentUser } from "@/data/mock-data"
 import { useMessageStore } from "@/features/messages/stores/message-store"
 import { cn, getInitials } from "@/lib/utils"
@@ -166,7 +166,7 @@ export function SessionNavBar() {
                   "flex items-center rounded-lg text-sidebar-foreground",
                   isCollapsed ? "h-12 w-12 justify-center" : "h-14 w-[12.25rem] justify-center",
                 )}
-                aria-label="Skene"
+                aria-label="Calliope"
               >
                 {isCollapsed ? (
                   <motion.div
@@ -186,7 +186,7 @@ export function SessionNavBar() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.18 }}
                   >
-                    <SkeneWordmark />
+                    <CalliopeWordmark />
                   </motion.div>
                 )}
               </div>

@@ -30,15 +30,15 @@ async function sendPasswordResetEmail(toEmail, resetToken) {
   const resetUrl =
     `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
   const mobileDeepLink =
-    `skene://reset-password?token=${resetToken}`;
+    `calliope://reset-password?token=${resetToken}`;
 
   await t.sendMail({
-    from: process.env.SMTP_FROM ?? 'noreply@skene.app',
+    from: process.env.SMTP_FROM ?? 'noreply@calliope.app',
     to: toEmail,
-    subject: 'Reset your Skēnē password',
+    subject: 'Reset your Calliope password',
     text: `Reset your password: ${resetUrl}`,
     html: `
-      <p>You requested a password reset for your Skēnē account.</p>
+      <p>You requested a password reset for your Calliope account.</p>
       <p><a href="${resetUrl}">Reset your password</a></p>
       <p>If you're on mobile, open this link:
          <a href="${mobileDeepLink}">${mobileDeepLink}</a></p>

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   synapse:
     image: matrixdotorg/synapse:latest
-    container_name: skene-synapse
+    container_name: calliope-synapse
     restart: unless-stopped
     environment:
       - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
@@ -15,11 +15,11 @@ services:
       synapse-db:
         condition: service_healthy
     networks:
-      - skene-matrix
+      - calliope-matrix
 
   synapse-db:
     image: postgres:16-alpine
-    container_name: skene-synapse-db
+    container_name: calliope-synapse-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: synapse
@@ -34,10 +34,10 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - skene-matrix
+      - calliope-matrix
 
 networks:
-  skene-matrix:
+  calliope-matrix:
     driver: bridge
 
 volumes:

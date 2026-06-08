@@ -4,7 +4,7 @@ import type { User } from "@/types"
 import { apiFetch } from "@/lib/api"
 import { getConfig } from "@/lib/config"
 
-const AUTH_STORAGE_KEY = "skene-auth"
+const AUTH_STORAGE_KEY = "calliope-auth"
 
 // ---------------------------------------------------------------------------
 // Storage adapter — REQUIRED on React Native.
@@ -294,7 +294,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "skene-auth",
+      name: "calliope-auth",
       storage: createJSONStorage(() => ({
         getItem: (key: string) => {
           return getAuthStorage().getItem(key)

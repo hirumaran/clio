@@ -8,7 +8,7 @@ export default function AuthLayout() {
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-primary p-10">
         <Link to="/" className="flex items-center gap-2">
           <Theater className="h-6 w-6 text-primary-foreground" />
-          <span className="text-xl font-medium tracking-tight text-primary-foreground">Skēnē</span>
+          <span className="text-xl font-medium tracking-tight text-primary-foreground">Calliope</span>
         </Link>
 
         <div className="max-w-sm space-y-4">
@@ -31,7 +31,7 @@ export default function AuthLayout() {
         <div className="w-full max-w-sm">
           <Link to="/" className="mb-8 flex items-center justify-center gap-2 lg:hidden">
             <Theater className="h-5 w-5 text-primary" />
-            <span className="text-lg font-medium tracking-tight">Skēnē</span>
+            <span className="text-lg font-medium tracking-tight">Calliope</span>
           </Link>
           <Outlet />
         </div>

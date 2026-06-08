@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Skēnē",
-    "slug": "skene",
+    "name": "Calliope",
+    "slug": "calliope",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "skene",
+    "scheme": "calliope",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"

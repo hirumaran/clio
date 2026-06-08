@@ -1,4 +1,4 @@
-// Headless harness for the Skēnē mobile auth flow.
+// Headless harness for the Calliope mobile auth flow.
 //
 // This file is intentionally tiny. It imports the *real* compiled auth
 // store and config (dist-harness) — the same code the web/native app runs
@@ -160,7 +160,7 @@ function deepEqual(a, b) {
 }
 
 async function main() {
-  console.log(`\n${YELLOW}=== Skēnē mobile auth harness ===${RESET}\n`)
+  console.log(`\n${YELLOW}=== Calliope mobile auth harness ===${RESET}\n`)
 
   // The backend URL the app would hit on a web build (from
   // src/stores/index.ts, web branch). Override via env if needed.
@@ -201,7 +201,7 @@ async function main() {
   // -------------------------------------------------------------------------
   // Step B: log in via the real store action.
   // -------------------------------------------------------------------------
-  const TEST_EMAIL = process.env.TEST_EMAIL || 'skene-mobile-e2e@example.test'
+  const TEST_EMAIL = process.env.TEST_EMAIL || 'calliope-mobile-e2e@example.test'
   const TEST_PASSWORD = process.env.TEST_PASSWORD || 'TestP@ssword-2026!'
   info('Test user', TEST_EMAIL)
 
@@ -297,8 +297,8 @@ async function main() {
   ok('token after logout', afterLogout.token ? 'STILL PRESENT (bug)' : 'null')
   ok('refreshToken after logout', afterLogout.refreshToken ? 'STILL PRESENT (bug)' : 'null')
   ok('isAuthenticated after logout', String(afterLogout.isAuthenticated))
-  const persisted = localStorage.getItem('skene-auth')
-  ok('localStorage "skene-auth" key', persisted === null ? 'cleared' : `STILL PRESENT: ${persisted.slice(0, 80)}...`)
+  const persisted = localStorage.getItem('calliope-auth')
+  ok('localStorage "calliope-auth" key', persisted === null ? 'cleared' : `STILL PRESENT: ${persisted.slice(0, 80)}...`)
 
   // Confirm /auth/logout was actually called.
   const newCalls = calls.slice(callsBeforeLogout)
@@ -336,7 +336,7 @@ async function main() {
   console.log(`\n${YELLOW}--- 7. login with wrong password ---${RESET}`)
   // Clear persisted state first so the next login starts from a known
   // baseline. (The previous logout already cleared it, but be explicit.)
-  localStorage.removeItem('skene-auth')
+  localStorage.removeItem('calliope-auth')
   const negOk = await reloaded.useAuthStore.getState().login(TEST_EMAIL, 'WRONG-PASSWORD')
   if (negOk === false && reloaded.useAuthStore.getState().error) {
     ok('login(wrong-pw)', `rejected (${reloaded.useAuthStore.getState().error})`)

@@ -206,7 +206,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "skene-auth",
+      name: "calliope-auth",
       storage: createJSONStorage(() => ({
         getItem: (key: string) => {
           return getAuthStorage().getItem(key)

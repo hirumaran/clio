@@ -86,7 +86,7 @@ export function AccountSecuritySection({ user }: { user: User }) {
 
       <SectionGroup
         title="Password"
-        description="Change the password used to access this Skēnē account."
+        description="Change the password used to access this Calliope account."
       >
         <div className="space-y-5">
           <PasswordInput

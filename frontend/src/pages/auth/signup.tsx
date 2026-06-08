@@ -59,7 +59,7 @@ export default function SignupPage() {
       <CardHeader className="space-y-1 px-0 lg:px-6">
         <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
         <CardDescription>
-          Join the Skēnē community and start sharing resources
+          Join the Calliope community and start sharing resources
         </CardDescription>
       </CardHeader>
       <CardContent className="px-0 lg:px-6">

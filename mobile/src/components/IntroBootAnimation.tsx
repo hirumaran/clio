@@ -17,7 +17,7 @@ type IntroBootAnimationProps = {
 type Pixel = {
   hash: number;
   id: string;
-  ring: number;
+  scan: number;
   size: number;
   x: number;
   y: number;
@@ -45,22 +45,18 @@ function hash2d(x: number, y: number) {
 function makePixels(width: number, height: number): Pixel[] {
   const cols = Math.ceil(width / CELL_SIZE) + 1;
   const rows = Math.ceil(height / CELL_SIZE) + 1;
-  const centerX = width / 2;
-  const centerY = height / 2;
-  const maxDistance = Math.hypot(centerX, centerY);
 
   return Array.from({ length: rows * cols }, (_, index) => {
     const row = Math.floor(index / cols);
     const col = index % cols;
     const x = col * CELL_SIZE;
     const y = row * CELL_SIZE;
-    const distance = Math.hypot(x - centerX, y - centerY);
     const noise = hash2d(col, row);
 
     return {
       hash: noise,
       id: `${col}-${row}`,
-      ring: distance / maxDistance,
+      scan: y / height,
       size: CELL_SIZE * (0.54 + noise * 0.38),
       x,
       y,
@@ -132,7 +128,7 @@ export function IntroBootAnimation({ onFinish }: IntroBootAnimationProps) {
 
   const arrival = smoothStep(progress / 0.36);
   const dissolve = smoothStep((progress - 0.62) / 0.32);
-  const radius = 0.12 + arrival * 1.02;
+  const scanHead = 0.16 + arrival * 1.1;
   const jitterFrame = frame * 0.21;
 
   return (
@@ -145,12 +141,16 @@ export function IntroBootAnimation({ onFinish }: IntroBootAnimationProps) {
             Math.floor(pixel.y / CELL_SIZE) - frame
           );
           const ripple =
-            Math.sin(pixel.ring * 30 - jitterFrame * 7 + pixel.hash * 6) * 0.5 +
+            Math.sin(pixel.scan * 34 - jitterFrame * 7 + pixel.hash * 6) * 0.5 +
             0.5;
           const field =
             pixel.hash * 0.48 + temporalNoise * 0.32 + ripple * 0.2;
-          const opening = pixel.ring < radius ? 1 : 0;
-          const breakup = pixel.hash * 0.72 + (1 - pixel.ring) * 0.28;
+          const scanWake = smoothStep((scanHead - pixel.scan) / 0.24);
+          const scanSpark = smoothStep(
+            1 - Math.abs(pixel.scan - scanHead) / 0.08
+          );
+          const opening = Math.max(scanWake, scanSpark * 0.85);
+          const breakup = pixel.hash * 0.72 + (1 - pixel.scan) * 0.28;
           const surviving = dissolve < breakup ? 1 : 0;
           const threshold = 0.58 - arrival * 0.18 + dissolve * 0.16;
           const visible = field > threshold && opening && surviving;

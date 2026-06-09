@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -23,6 +23,7 @@ import {
   authSharedStyles,
   useAuthTheme,
 } from '@/components/auth/auth-ui';
+import { markFirstSignupBootPending } from '@/lib/firstSignupBoot';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -37,9 +38,10 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+  const signupBootRedirectRef = useRef(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !signupBootRedirectRef.current) {
       router.replace('/(tabs)/catalogue');
     }
   }, [isAuthenticated, router]);
@@ -60,8 +62,23 @@ export default function RegisterScreen() {
 
     setLocalError(null);
     clearError();
-    await signup(email.trim(), password, fullName.trim());
-  }, [fullName, email, password, signup, clearError]);
+    signupBootRedirectRef.current = true;
+
+    try {
+      const created = await signup(email.trim(), password, fullName.trim());
+
+      if (!created) {
+        signupBootRedirectRef.current = false;
+        return;
+      }
+
+      await markFirstSignupBootPending();
+      router.replace('/clio-boot');
+    } catch (error) {
+      signupBootRedirectRef.current = false;
+      setLocalError((error as Error).message || 'Unable to complete signup.');
+    }
+  }, [fullName, email, password, signup, clearError, router]);
 
   const errorText = localError || storeError;
 

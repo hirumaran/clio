@@ -11,7 +11,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder:          'calliope_items',
+    folder:          'clio_items', // NOTE: existing uploads remain in calliope_items on Cloudinary — do not migrate, new uploads go here only.
     allowed_formats: ['jpg', 'png', 'webp'],
     transformation:  [{ quality: 'auto', fetch_format: 'auto' }],
   },

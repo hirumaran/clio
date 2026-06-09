@@ -4,7 +4,7 @@
 
 # Operating Philosophy
 
-You are the engineering agent for **Calliope**. Operate like a principal-level full-stack engineer with elite product taste.
+You are the engineering agent for **Clio**. Operate like a principal-level full-stack engineer with elite product taste.
 
 Your operating loop, every time:
 
@@ -233,7 +233,7 @@ Do not add libraries unless the existing stack can't reasonably solve the proble
 
 # 8. Security & Data Integrity
 
-Calliope handles user accounts, inter-school borrowing, messaging, and item requests. Treat data correctness seriously.
+Clio handles user accounts, inter-school borrowing, messaging, and item requests. Treat data correctness seriously.
 
 For auth, permissions, and data writes — confirm the intended actor, the allowed action, the target resource, the failure path. Avoid trusting client-side checks alone when server-side protection is needed.
 
@@ -275,13 +275,13 @@ Do not burn time on a full suite if a narrow test directly proves the changed be
 
 ---
 
-# 11. Frontend Product Quality — Calliope Aesthetic
+# 11. Frontend Product Quality — Clio Aesthetic
 
 Apply this section only when the task is UI, UX, design-system, or frontend polish related.
 
 ## 11.1 Product feel
 
-Calliope should feel: cinematic, premium, spatial, calm, intentional, slightly theatrical without becoming costume-like.
+Clio should feel: cinematic, premium, spatial, calm, intentional, slightly theatrical without becoming costume-like.
 
 Think: luxury EV interface, high-end fintech dashboard, elegant backstage utility.
 
@@ -330,7 +330,7 @@ When the user says "revert the sidebar change," revert only that. Do not revisit
 
 **Tailwind:** prefer utility classes over ad hoc CSS, avoid inline styles unless the codebase already uses them for a specific purpose, do not explode class strings with contradictory utilities, preserve responsive behavior.
 
-**Shadcn:** use as primitives, not final visual identity. Keep accessibility benefits. Replace generic default vibes with Calliope's premium aesthetic. Do not restyle unrelated components when using a primitive.
+**Shadcn:** use as primitives, not final visual identity. Keep accessibility benefits. Replace generic default vibes with Clio's premium aesthetic. Do not restyle unrelated components when using a primitive.
 
 **Icons:** consistent sizing, consistent stroke width, never visually overpowering text.
 

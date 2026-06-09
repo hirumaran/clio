@@ -7,9 +7,11 @@ import {
   Text,
   View,
   type StyleProp,
+  type TextStyle,
   type ViewStyle,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -17,15 +19,34 @@ import Svg, { Path } from 'react-native-svg';
 import { useAuthStore } from '@/stores';
 import { authSharedStyles } from '@/components/auth/auth-ui';
 
-function CalliopeWordmark() {
+const CLIO_FONT_WEIGHT = '360' as unknown as TextStyle['fontWeight'];
+
+function BackgroundEffects() {
   return (
-    <View style={styles.calliopeWordmarkWrap}>
+    <View pointerEvents="none" style={styles.backgroundEffects}>
+      <View style={[styles.screenGlowEdge, styles.screenGlowTop]} />
+      <View style={[styles.screenGlowEdge, styles.screenGlowRight]} />
+      <View style={[styles.screenGlowEdge, styles.screenGlowBottom]} />
+      <View style={[styles.screenGlowEdge, styles.screenGlowLeft]} />
+    </View>
+  );
+}
+
+function ClioWordmark() {
+  const [fontsLoaded] = useFonts({
+    BitcountSingle: require('../../../assets/fonts/BitcountSingle-Variable.ttf'),
+  });
+  const fontStyle = fontsLoaded ? styles.bitcountSingle : null;
+
+  return (
+    <View style={styles.clioWordmarkWrap}>
       <Text
+        accessibilityLabel="Clio"
         adjustsFontSizeToFit
         numberOfLines={1}
-        style={styles.calliopeWordmark}
+        style={[styles.clioText, styles.clioWordmark, fontStyle]}
       >
-        Calliope
+        Clio
       </Text>
     </View>
   );
@@ -83,24 +104,33 @@ function AuthButton({
         style,
       ]}
     >
-      {icon ? (
-        typeof icon === 'string' ? (
-          <Text style={[styles.sheetButtonIcon, { color: textColor }]}>
-            {icon}
-          </Text>
-        ) : (
-          icon
-        )
-      ) : null}
-      <Text
+      <View
         style={[
-          styles.authButtonLabel,
-          variant === 'outline' && styles.outlineButtonLabel,
-          { color: textColor },
+          styles.authButtonContent,
+          variant === 'apple' && styles.appleButtonContent,
         ]}
       >
-        {label}
-      </Text>
+        {icon ? (
+          typeof icon === 'string' ? (
+            <View style={styles.sheetButtonIconFrame}>
+              <Text style={[styles.sheetButtonIcon, { color: textColor }]}>
+                {icon}
+              </Text>
+            </View>
+          ) : (
+            icon
+          )
+        ) : null}
+        <Text
+          style={[
+            styles.authButtonLabel,
+            variant === 'outline' && styles.outlineButtonLabel,
+            { color: textColor },
+          ]}
+        >
+          {label}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -125,8 +155,10 @@ export default function AuthLandingScreen() {
     >
       <StatusBar style="dark" />
       <View style={styles.root}>
+        <BackgroundEffects />
+
         <View style={styles.statementArea}>
-          <CalliopeWordmark />
+          <ClioWordmark />
         </View>
 
         <View style={[styles.sheet, { paddingBottom: sheetPaddingBottom }]}>
@@ -181,30 +213,83 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
   },
+  backgroundEffects: {
+    bottom: 0,
+    left: 0,
+    overflow: 'hidden',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 20,
+  },
   statementArea: {
     alignItems: 'center',
     left: 0,
     paddingHorizontal: 28,
     position: 'absolute',
     right: 0,
-    top: '31.5%',
+    top: '34.5%',
     zIndex: 5,
   },
-  calliopeWordmarkWrap: {
+  screenGlowEdge: {
+    position: 'absolute',
+    shadowOffset: { height: 0, width: 0 },
+    shadowOpacity: 0.28,
+    shadowRadius: 24,
+  },
+  screenGlowTop: {
+    backgroundColor: 'rgba(147, 197, 253, 0.22)',
+    height: 1,
+    left: 0,
+    right: 0,
+    shadowColor: '#93c5fd',
+    top: 0,
+  },
+  screenGlowRight: {
+    backgroundColor: 'rgba(165, 243, 252, 0.24)',
+    bottom: 0,
+    right: -1,
+    shadowColor: '#67e8f9',
+    top: 0,
+    width: 1,
+  },
+  screenGlowBottom: {
+    backgroundColor: 'rgba(253, 230, 138, 0.16)',
+    bottom: 0,
+    height: 1,
+    left: 0,
+    right: 0,
+    shadowColor: '#fde68a',
+  },
+  screenGlowLeft: {
+    backgroundColor: 'rgba(251, 207, 232, 0.2)',
+    bottom: 0,
+    left: -1,
+    shadowColor: '#fbcfe8',
+    top: 0,
+    width: 1,
+  },
+  clioWordmarkWrap: {
     alignItems: 'center',
-    flexDirection: 'row',
+    height: 112,
     justifyContent: 'center',
+    position: 'relative',
     width: '100%',
   },
-  calliopeWordmark: {
-    color: LAUNCH_COLORS.black,
-    flexShrink: 1,
-    fontSize: 58,
-    fontWeight: '800',
-    letterSpacing: -2,
-    lineHeight: 66,
-    maxWidth: 260,
+  bitcountSingle: {
+    fontFamily: 'BitcountSingle',
+  },
+  clioText: {
+    fontSize: 96,
+    fontWeight: CLIO_FONT_WEIGHT,
+    letterSpacing: 5,
+    lineHeight: 112,
+    maxWidth: '92%',
     minWidth: 0,
+    textAlign: 'center',
+  },
+  clioWordmark: {
+    color: LAUNCH_COLORS.black,
   },
   sheet: {
     backgroundColor: LAUNCH_COLORS.black,
@@ -221,11 +306,18 @@ const styles = StyleSheet.create({
   authButton: {
     alignItems: 'center',
     borderRadius: 16,
-    flexDirection: 'row',
-    gap: 10,
     height: 48,
     justifyContent: 'center',
     width: '100%',
+  },
+  authButtonContent: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    justifyContent: 'center',
+  },
+  appleButtonContent: {
+    transform: [{ translateX: 8 }],
   },
   authButtonGap: {
     marginTop: 10,
@@ -244,11 +336,19 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.72,
   },
+  sheetButtonIconFrame: {
+    alignItems: 'center',
+    height: 22,
+    justifyContent: 'center',
+    width: 20,
+  },
   sheetButtonIcon: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '700',
-    lineHeight: 22,
-    marginTop: -1,
+    includeFontPadding: false,
+    lineHeight: 24,
+    textAlign: 'center',
+    transform: [{ translateY: -1 }],
   },
   authButtonLabel: {
     fontSize: 18,

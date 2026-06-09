@@ -1,5 +1,5 @@
-import { CalliopeDynamicNav } from "./skene-dynamic-nav"
+import { ClioDynamicNav } from "./skene-dynamic-nav"
 
 export function TopBar() {
-  return <CalliopeDynamicNav />
+  return <ClioDynamicNav />
 }

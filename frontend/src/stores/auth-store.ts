@@ -206,7 +206,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "calliope-auth",
+      name: "clio-auth",
       storage: createJSONStorage(() => ({
         getItem: (key: string) => {
           return getAuthStorage().getItem(key)

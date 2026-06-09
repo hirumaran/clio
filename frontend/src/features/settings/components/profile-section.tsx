@@ -103,7 +103,7 @@ export function ProfileSection({
             className={`${settingsInputClass} border-[var(--settings-input-border)] bg-[var(--settings-input-bg)] text-[var(--settings-input-text)] placeholder:text-[var(--settings-input-placeholder)]`}
           />
         </SettingRow>
-        <SettingRow label="What should Calliope call you?">
+        <SettingRow label="What should Clio call you?">
           <Input
             value={form.callName}
             onChange={(event) =>

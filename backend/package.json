@@ -1,7 +1,7 @@
 {
-  "name": "calliope-backend",
+  "name": "clio-backend",
   "version": "1.0.0",
-  "description": "Calliope resource-sharing platform backend",
+  "description": "Clio resource-sharing platform backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

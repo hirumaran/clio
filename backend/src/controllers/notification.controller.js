@@ -106,7 +106,7 @@ async function deleteNotification(req, res) {
  *     type: 'borrow_request',
  *     title: 'New Borrow Request',
  *     body: `${requesterName} wants to borrow "${itemName}"`,
- *     link: `calliope://requests/${requestId}`
+ *     link: `clio://requests/${requestId}`
  *   })
  */
 async function createNotification(_pool, { userId, type, title, body, link }) {

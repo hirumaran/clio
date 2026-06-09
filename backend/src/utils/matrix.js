@@ -144,8 +144,8 @@ async function refreshMatrixToken(localpart, password) {
         type:       'm.login.password',
         identifier: { type: 'm.id.user', user: localpart },
         password,
-        device_id:  'CALLIOPE_SERVER',
-        initial_device_display_name: 'Calliope',
+        device_id:  'CLIO_SERVER',
+        initial_device_display_name: 'Clio',
       }),
     }
   );

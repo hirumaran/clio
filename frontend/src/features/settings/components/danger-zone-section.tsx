@@ -15,7 +15,7 @@ export function DangerZoneSection() {
 
       <SectionGroup
         title="Account data"
-        description="Export or disable your Calliope account. These actions require confirmation."
+        description="Export or disable your Clio account. These actions require confirmation."
         danger
       >
         <div className="space-y-3">

@@ -73,21 +73,21 @@ const viewBoxWidth =
 const viewBoxHeight = dotRadius * 2 + 5 * dotPitch
 const macron = "01110"
 
-interface CalliopeWordmarkProps {
+interface ClioWordmarkProps {
   className?: string
 }
 
-export function CalliopeWordmark({ className }: CalliopeWordmarkProps) {
+export function ClioWordmark({ className }: ClioWordmarkProps) {
   return (
     <svg
-      aria-label="Calliope"
+      aria-label="Clio"
       className={cn("h-full w-full fill-current", className)}
       focusable="false"
       role="img"
       shapeRendering="geometricPrecision"
       viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
     >
-      <title>Calliope</title>
+      <title>Clio</title>
       {wordmark.flatMap((letter, letterIndex) => {
         const xOffset = letterIndex * (glyphWidth + letterGap)
         const rows = [

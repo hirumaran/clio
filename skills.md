@@ -1,4 +1,4 @@
-# Calliope: Agent Skills Manifest
+# Clio: Agent Skills Manifest
 
 When executing any frontend task in this repository, the agent MUST automatically load and cross-reference the following installed skills. Do not generate UI code without consulting these frameworks.
 

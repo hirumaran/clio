@@ -56,7 +56,7 @@ function UtilityButton({
   )
 }
 
-export function CalliopeDynamicNav() {
+export function ClioDynamicNav() {
   const [alertsOpen, setAlertsOpen] = useState(false)
   const shellRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()

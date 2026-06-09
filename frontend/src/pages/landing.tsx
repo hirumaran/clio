@@ -214,7 +214,7 @@ function CatalogueDiagram() {
         />
       </div>
 
-      {/* Card 2 — Calliope Curated Catalogue */}
+      {/* Card 2 — Clio Curated Catalogue */}
       <motion.div
         initial={{ opacity: 0, scale: 0.97 }}
         animate={isInView ? { opacity: 1, scale: 1 } : {}}
@@ -226,7 +226,7 @@ function CatalogueDiagram() {
           className="font-sans uppercase tracking-widest text-center mb-4"
           style={{ color: '#B0B0B0', fontSize: '11px', letterSpacing: '0.15em', fontWeight: 500 }}
         >
-          Calliope Curated Catalogue
+          Clio Curated Catalogue
         </p>
         <div className="grid grid-cols-2 gap-2.5">
           {[
@@ -400,7 +400,7 @@ export default function LandingPage() {
         <div className="container flex h-16 items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 font-display text-xl tracking-tight">
             <Theater className="h-5 w-5 text-primary" />
-            Calliope
+            Clio
           </Link>
           <nav className="flex items-center gap-3">
             <ThemeToggle />
@@ -536,7 +536,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
               className="text-base md:text-lg leading-relaxed text-muted-foreground"
             >
-              Every department has a closet full of props gathering dust. Calliope turns those closets into a shared network — so you spend less of your budget on things you use once, and more on what matters.
+              Every department has a closet full of props gathering dust. Clio turns those closets into a shared network — so you spend less of your budget on things you use once, and more on what matters.
             </motion.p>
           </div>
         </div>
@@ -695,14 +695,14 @@ export default function LandingPage() {
             animate={{ x: ["-3%", "3%"], opacity: [0.4, 0.7] }}
             transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
           >
-            Calliope
+            Clio
           </motion.span>
         </div>
 
         {/* Standard footer row */}
         <div className="container py-8">
           <div className="flex flex-col md:flex-row md:items-center gap-4 text-[0.875rem] text-muted-foreground font-sans">
-            <p className="md:w-1/3 md:text-left">&copy; {new Date().getFullYear()} Calliope</p>
+            <p className="md:w-1/3 md:text-left">&copy; {new Date().getFullYear()} Clio</p>
 
             <nav className="md:w-1/3 flex flex-wrap justify-center gap-x-6 gap-y-1">
               <Link to="/" className="hover:text-foreground transition-colors">Home</Link>

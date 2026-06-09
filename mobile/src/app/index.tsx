@@ -97,9 +97,10 @@ export default function Index() {
         {!isLogoTypewriterDone ? (
           <View pointerEvents="none" style={styles.wordmarkMask} />
         ) : null}
-        {!isIntroBootDone ? (
-          <IntroBootAnimation onFinish={handleIntroBootFinish} />
-        ) : null}
+        <IntroBootAnimation
+          isBackdrop={isIntroBootDone}
+          onFinish={handleIntroBootFinish}
+        />
         {isIntroBootDone && !isLogoTypewriterDone ? (
           <IntroLogoTypewriter onFinish={handleLogoTypewriterFinish} />
         ) : null}

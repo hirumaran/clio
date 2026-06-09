@@ -96,7 +96,8 @@ export function IntroLogoTypewriter({ onFinish }: IntroLogoTypewriterProps) {
 const styles = StyleSheet.create({
   wordmarkCover: {
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'transparent',
+    elevation: 30,
     height: 112,
     justifyContent: 'center',
     left: 0,

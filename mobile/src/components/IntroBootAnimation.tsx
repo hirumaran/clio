@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 type IntroBootAnimationProps = {
+  isBackdrop?: boolean;
   onFinish: () => void;
 };
 
@@ -26,7 +27,8 @@ type Pixel = {
 const TIMELINE_DURATION_MS = 2450;
 const FADE_DELAY_MS = 1880;
 const FADE_DURATION_MS = 420;
-const CELL_SIZE = 16;
+const BOOT_CELL_SIZE = 16;
+const BOOT_REVEAL_OPACITY = 0.065;
 
 function clamp(value: number) {
   return Math.min(Math.max(value, 0), 1);
@@ -43,28 +45,31 @@ function hash2d(x: number, y: number) {
 }
 
 function makePixels(width: number, height: number): Pixel[] {
-  const cols = Math.ceil(width / CELL_SIZE) + 1;
-  const rows = Math.ceil(height / CELL_SIZE) + 1;
+  const cols = Math.ceil(width / BOOT_CELL_SIZE) + 1;
+  const rows = Math.ceil(height / BOOT_CELL_SIZE) + 1;
 
   return Array.from({ length: rows * cols }, (_, index) => {
     const row = Math.floor(index / cols);
     const col = index % cols;
-    const x = col * CELL_SIZE;
-    const y = row * CELL_SIZE;
+    const x = col * BOOT_CELL_SIZE;
+    const y = row * BOOT_CELL_SIZE;
     const noise = hash2d(col, row);
 
     return {
       hash: noise,
       id: `${col}-${row}`,
       scan: y / height,
-      size: CELL_SIZE * (0.54 + noise * 0.38),
+      size: BOOT_CELL_SIZE * (0.54 + noise * 0.38),
       x,
       y,
     };
   });
 }
 
-export function IntroBootAnimation({ onFinish }: IntroBootAnimationProps) {
+export function IntroBootAnimation({
+  isBackdrop = false,
+  onFinish,
+}: IntroBootAnimationProps) {
   const { height, width } = useWindowDimensions();
   const [frame, setFrame] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -81,7 +86,7 @@ export function IntroBootAnimation({ onFinish }: IntroBootAnimationProps) {
 
     opacity.value = withDelay(
       FADE_DELAY_MS,
-      withTiming(0, {
+      withTiming(BOOT_REVEAL_OPACITY, {
         duration: FADE_DURATION_MS,
         easing: Easing.out(Easing.quad),
       })
@@ -106,6 +111,8 @@ export function IntroBootAnimation({ onFinish }: IntroBootAnimationProps) {
 
     const finishTimer = setTimeout(() => {
       console.log('[intro-boot] finish timer fired — handing off');
+      clearInterval(frameTimer);
+      setProgress(1);
       onFinish();
     }, TIMELINE_DURATION_MS);
 
@@ -123,7 +130,12 @@ export function IntroBootAnimation({ onFinish }: IntroBootAnimationProps) {
   }, []);
 
   const screenStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
+    opacity: isBackdrop
+      ? withTiming(1, {
+          duration: 320,
+          easing: Easing.out(Easing.quad),
+        })
+      : opacity.value,
   }));
 
   const arrival = smoothStep(progress / 0.36);
@@ -132,13 +144,24 @@ export function IntroBootAnimation({ onFinish }: IntroBootAnimationProps) {
   const jitterFrame = frame * 0.21;
 
   return (
-    <Animated.View style={[styles.screen, screenStyle]}>
+    <Animated.View
+      style={[
+        styles.screen,
+        isBackdrop ? styles.backdropScreen : null,
+        screenStyle,
+      ]}
+    >
       <StatusBar style="dark" />
-      <Svg height={height} pointerEvents="none" style={styles.grid} width={width}>
+      <Svg
+        height={height}
+        pointerEvents="none"
+        style={[styles.grid, isBackdrop ? styles.backdropGrid : null]}
+        width={width}
+      >
         {pixels.map((pixel) => {
           const temporalNoise = hash2d(
-            Math.floor(pixel.x / CELL_SIZE) + frame,
-            Math.floor(pixel.y / CELL_SIZE) - frame
+            Math.floor(pixel.x / BOOT_CELL_SIZE) + frame,
+            Math.floor(pixel.y / BOOT_CELL_SIZE) - frame
           );
           const ripple =
             Math.sin(pixel.scan * 34 - jitterFrame * 7 + pixel.hash * 6) * 0.5 +
@@ -154,18 +177,26 @@ export function IntroBootAnimation({ onFinish }: IntroBootAnimationProps) {
           const surviving = dissolve < breakup ? 1 : 0;
           const threshold = 0.58 - arrival * 0.18 + dissolve * 0.16;
           const visible = field > threshold && opening && surviving;
+          const backdropField = pixel.hash * 0.72 + temporalNoise * 0.28;
+          const backdropVisible = backdropField > 0.58;
 
-          if (!visible) return null;
+          if (isBackdrop) {
+            if (!backdropVisible) return null;
+          } else if (!visible) return null;
 
           return (
             <Rect
               fill="#000000"
               height={pixel.size}
               key={pixel.id}
-              opacity={0.72 + pixel.hash * 0.28}
+              opacity={
+                isBackdrop
+                  ? 0.025 + pixel.hash * 0.045
+                  : 0.72 + pixel.hash * 0.28
+              }
               width={pixel.size}
-              x={pixel.x + (CELL_SIZE - pixel.size) / 2}
-              y={pixel.y + (CELL_SIZE - pixel.size) / 2}
+              x={pixel.x + (BOOT_CELL_SIZE - pixel.size) / 2}
+              y={pixel.y + (BOOT_CELL_SIZE - pixel.size) / 2}
             />
           );
         })}
@@ -193,5 +224,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
+  },
+  backdropScreen: {
+    backgroundColor: 'transparent',
+    bottom: '31%',
+    elevation: 24,
+    overflow: 'hidden',
+    zIndex: 24,
+  },
+  backdropGrid: {
+    backgroundColor: 'transparent',
   },
 });

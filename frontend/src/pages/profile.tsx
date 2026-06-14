@@ -67,6 +67,13 @@ function makeHandle(name: string) {
     .replace(/(^\.|\.$)/g, "")}`
 }
 
+function makeShelfName(name: string) {
+  const firstName = name.trim().split(/\s+/)[0] || "Your"
+  if (firstName.length <= 6) return firstName
+
+  return firstName.slice(0, Math.max(4, Math.floor(firstName.length / 2)))
+}
+
 function getTopCategory(resources: Resource[]) {
   const counts = resources.reduce<Partial<Record<Resource["category"], number>>>(
     (acc, resource) => {
@@ -275,6 +282,7 @@ export default function ProfilePage() {
       ? userResources.reduce((sum, r) => sum + r.rating, 0) / userResources.length
       : 0
   const profileHandle = makeHandle(profileUser.name)
+  const shelfName = makeShelfName(profileUser.name)
   const topCategory = getTopCategory(userResources)
   const joinedLabel = formatDate(profileUser.joinedAt)
 
@@ -406,7 +414,7 @@ export default function ProfilePage() {
                 Shared resources
               </p>
               <h2 className="mt-2 font-serif text-3xl text-[#f7efe3]">
-                Sarah&apos;s Shelf
+                {shelfName}&apos;s Shelf
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[#cfc4b4]">
                 A curated archive of classroom-ready scripts, lesson materials,

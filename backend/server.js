@@ -14,7 +14,7 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
-      imgSrc: ["'self'", "https://res.cloudinary.com", "data:"],
+      imgSrc: ["'self'", "https://res.cloudinary.com", "https://images.unsplash.com", "data:"],
       connectSrc: ["'self'", process.env.MATRIX_HOMESERVER_URL ?? ''],
       scriptSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],

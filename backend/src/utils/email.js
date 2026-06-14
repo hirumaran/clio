@@ -50,4 +50,47 @@ async function sendPasswordResetEmail(toEmail, resetToken) {
   return { sent: true };
 }
 
-module.exports = { sendPasswordResetEmail };
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+async function sendContactSubmissionEmail({ name, email, organization, role, message }) {
+  const t = getTransporter();
+  if (!t) {
+    console.log('[Contact] SMTP not configured — submission logged:', {
+      name,
+      email,
+      organization,
+      role,
+      message: message.slice(0, 500),
+    });
+    return { skipped: true };
+  }
+
+  const to = process.env.CONTACT_EMAIL_TO || process.env.SMTP_FROM || 'team@clio.app';
+  const from = process.env.SMTP_FROM ?? 'noreply@clio.app';
+
+  await t.sendMail({
+    from,
+    to,
+    replyTo: email,
+    subject: `Contact submission from ${name} (${organization})`,
+    text: `Name: ${name}\nEmail: ${email}\nOrganization: ${organization}\nRole: ${role}\n\nMessage:\n${message}`,
+    html: `
+      <p><strong>Name:</strong> ${escapeHtml(name)}</p>
+      <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+      <p><strong>Organization:</strong> ${escapeHtml(organization)}</p>
+      <p><strong>Role:</strong> ${escapeHtml(role)}</p>
+      <p><strong>Message:</strong></p>
+      <p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>
+    `,
+  });
+
+  return { sent: true };
+}
+
+module.exports = { sendPasswordResetEmail, sendContactSubmissionEmail };

@@ -287,7 +287,7 @@ export function DangerAction({
       {confirming && (
         <div className="mt-4 overflow-hidden rounded-xl border border-[var(--settings-danger-border)] bg-[var(--settings-card-bg)] p-3">
           <p className="text-sm text-[var(--settings-text-secondary)]">
-            Confirm this action for Sarah Johnson's Clio account.
+            Confirm this action for this Clio account.
           </p>
           <div className="mt-3 flex justify-end gap-2">
             <Button

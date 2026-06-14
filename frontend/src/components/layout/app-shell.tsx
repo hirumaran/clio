@@ -24,8 +24,9 @@ export default function AppShell() {
   const isMessages = pathname.startsWith("/messages")
   const isDashboard = pathname.startsWith("/dashboard")
   const isProfile = pathname.startsWith("/profile")
+  const isMyResources = pathname.startsWith("/my-resources")
   const usesDitherBackground =
-    isDashboard || pathname.startsWith("/settings") || isProfile
+    isDashboard || pathname.startsWith("/settings") || isProfile || isMyResources
 
   useEffect(() => {
     const syncTheme = () => setResolvedTheme(getResolvedTheme())

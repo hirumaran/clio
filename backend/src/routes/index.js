@@ -6,6 +6,7 @@ const schoolRoutes = require('./school.routes');
 const adminRoutes = require('./admin.routes');
 const notificationRoutes = require('./notification.routes');
 const deviceRoutes = require('./device.routes');
+const contactRoutes = require('./contact.routes');
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.use('/requests', requestRoutes);
 router.use('/schools', schoolRoutes);
 router.use('/admin', adminRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/contact', contactRoutes);
 
 module.exports = router;

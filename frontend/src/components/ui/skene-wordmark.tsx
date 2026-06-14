@@ -54,13 +54,9 @@ const glyphs = {
 
 const wordmark = [
   { glyph: "C", accented: false },
-  { glyph: "A", accented: false },
-  { glyph: "L", accented: false },
   { glyph: "L", accented: false },
   { glyph: "I", accented: false },
   { glyph: "O", accented: false },
-  { glyph: "P", accented: false },
-  { glyph: "E", accented: false },
 ] as const
 
 const dotRadius = 2.55

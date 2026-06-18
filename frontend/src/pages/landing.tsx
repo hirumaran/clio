@@ -14,15 +14,14 @@ import { LandingFooter } from "@/features/landing/components/landing-footer"
 
 /**
  * Public landing page for Clio.
- * Architecture-firm inspired layout: massive whitespace, strong grid,
- * editorial typography, restrained palette, theme-aware via CSS variables.
+ * White-gallery aesthetic: pure white canvas, a single coral accent,
+ * tightly-tracked Geist type, 1px hairline borders, and vast whitespace.
+ * Theme tokens are scoped to .landing-root (see index.css).
  */
 export default function LandingPage() {
   return (
     <MotionConfig reducedMotion="user">
-      <div className="landing-root min-h-screen overflow-x-hidden bg-[var(--background)] text-[var(--text-primary)]">
-        <div className="landing-aurora" aria-hidden="true" />
-        <div className="landing-grain" aria-hidden="true" />
+      <div className="landing-root min-h-screen overflow-x-hidden bg-[var(--background)] text-[var(--text-secondary)]">
         <ScrollProgress />
         <LandingNav />
         <main className="relative z-10">

@@ -40,7 +40,7 @@ export function LandingImpact() {
                 value={stat.value}
                 className="block text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary)]"
               />
-              <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-[var(--text-muted)]">{stat.label}</p>
+              <p className="mt-4 text-[13px] tracking-[-0.01em] text-[var(--text-muted)]">{stat.label}</p>
             </motion.div>
           ))}
         </div>

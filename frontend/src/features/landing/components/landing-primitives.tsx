@@ -12,13 +12,13 @@ interface LandingButtonProps extends Omit<HTMLMotionProps<"button">, "children">
 }
 
 const baseClasses =
-  "inline-flex items-center justify-center text-[11px] uppercase tracking-[0.18em] font-medium px-6 py-3.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
+  "inline-flex items-center justify-center rounded-[4px] text-[13px] tracking-[-0.01em] font-medium px-6 py-3 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--text-muted)]",
+    "bg-[var(--foreground)] text-[var(--background)] hover:bg-[var(--text-secondary)]",
   outline:
-    "border border-[var(--border-default)] text-[var(--text-primary)] hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]",
+    "border border-[var(--border-strong)] text-[var(--text-primary)] hover:border-[var(--text-primary)]",
   ghost:
     "text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
 }
@@ -76,7 +76,7 @@ export const LandingInput = forwardRef<HTMLInputElement, React.InputHTMLAttribut
     return (
       <input
         ref={ref}
-        className={`w-full bg-transparent border-b border-[var(--border-default)] px-0 py-3 text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--text-primary)] focus:outline-none transition-colors ${className}`}
+        className={`w-full bg-transparent border-b border-[var(--border-default)] px-0 py-3 text-[16px] tracking-[-0.01em] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none transition-colors ${className}`}
         {...props}
       />
     )
@@ -88,7 +88,7 @@ export const LandingLabel = ({ children, htmlFor, className = "" }: { children: 
   return (
     <label
       htmlFor={htmlFor}
-      className={`block text-[10px] uppercase tracking-[0.22em] text-[var(--text-muted)] mb-2 ${className}`}
+      className={`block text-[12px] tracking-[-0.01em] text-[var(--text-muted)] mb-2 ${className}`}
     >
       {children}
     </label>
@@ -110,7 +110,7 @@ SectionWrapper.displayName = "SectionWrapper"
 
 export const Eyebrow = ({ children, className = "" }: { children: ReactNode; className?: string }) => {
   return (
-    <p className={`text-[10px] uppercase tracking-[0.25em] font-medium text-[var(--text-muted)] ${className}`}>
+    <p className={`text-[13px] tracking-[-0.01em] font-medium text-[var(--primary)] ${className}`}>
       {children}
     </p>
   )

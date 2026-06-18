@@ -34,22 +34,6 @@ export function LandingContact() {
 
   return (
     <SectionWrapper id="contact" className="relative overflow-hidden py-32 md:py-44 border-t border-[var(--border-default)]">
-      <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
-        <svg
-          viewBox="0 0 1200 600"
-          className="absolute inset-0 w-full h-full opacity-[0.08]"
-          preserveAspectRatio="xMidYMid slice"
-        >
-          <defs>
-            <pattern id="contact-grid" width="32" height="32" patternUnits="userSpaceOnUse">
-              <rect width="32" height="32" fill="transparent" />
-              <circle cx="1" cy="1" r="1" fill="var(--text-primary)" />
-            </pattern>
-          </defs>
-          <rect width="1200" height="600" fill="url(#contact-grid)" />
-        </svg>
-      </div>
-
       <div className="container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           <motion.div
@@ -71,7 +55,7 @@ export function LandingContact() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
-            className="bg-[var(--bg-raised)] border border-[var(--border-default)] p-8 md:p-12"
+            className="rounded-[4px] bg-[var(--bg-raised)] border border-[var(--border-default)] p-8 md:p-12"
           >
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -130,7 +114,7 @@ export function LandingContact() {
                   placeholder="Describe your inventory or collaboration goals"
                   rows={4}
                   required
-                  className="w-full bg-transparent border-b border-[var(--border-default)] px-0 py-3 text-[15px] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--text-primary)] focus:outline-none transition-colors resize-none"
+                  className="w-full bg-transparent border-b border-[var(--border-default)] px-0 py-3 text-[16px] tracking-[-0.01em] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:border-[var(--primary)] focus:outline-none transition-colors resize-none"
                 />
               </div>
 

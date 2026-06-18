@@ -1,9 +1,9 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
 import { LandingLinkButton } from "./landing-primitives"
-import { Magnetic, useScrollSpy } from "./landing-motion"
+import { useScrollSpy } from "./landing-motion"
 
 const LINKS = [
   { label: "Platform", href: "#platform", id: "platform" },
@@ -12,60 +12,59 @@ const LINKS = [
 ]
 
 export function LandingNav() {
-  const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
-  const { scrollY } = useScroll()
   const active = useScrollSpy(LINKS.map((l) => l.id))
-
-  useMotionValueEvent(scrollY, "change", (v) => setScrolled(v > 24))
 
   return (
     <motion.header
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className={`landing-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "border-b border-[var(--border-subtle)] bg-[var(--background)]/80 backdrop-blur-md"
-          : "border-b border-transparent bg-transparent"
-      }`}
+      className="landing-nav fixed top-0 left-0 right-0 z-50"
     >
-      <nav className={`container flex items-center justify-between transition-all duration-300 ${scrolled ? "h-14" : "h-16"}`}>
-        <Link to="/" className="text-[18px] font-medium tracking-tight text-[var(--text-primary)]">
-          Clio
+      <nav className="container relative flex items-center justify-between py-5">
+        {/* Wordmark — the name is the brand */}
+        <Link
+          to="/"
+          className="text-[18px] font-semibold tracking-[-0.04em] text-[var(--text-primary)]"
+        >
+          clio
         </Link>
 
-        <ul className="hidden md:flex items-center gap-10">
-          {LINKS.map((link) => (
-            <li key={link.label}>
-              <a
-                href={link.href}
-                className={`relative text-[11px] uppercase tracking-[0.18em] transition-colors ${
-                  active === link.id ? "text-[var(--text-primary)]" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                }`}
-              >
-                {link.label}
-                {active === link.id && (
-                  <motion.span
-                    layoutId="nav-underline"
-                    className="absolute -bottom-1.5 left-0 right-0 h-px bg-[var(--primary)]"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+        {/* Floating pill — centered on the canvas, no shadow */}
+        <ul className="landing-pill absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:flex items-center p-1.5">
+          {LINKS.map((link) => {
+            const isActive = active === link.id
+            return (
+              <li key={link.label}>
+                <a
+                  href={link.href}
+                  className={`flex items-center gap-1.5 rounded-[20px] px-4 py-2 text-[12px] tracking-[-0.01em] transition-colors ${
+                    isActive
+                      ? "text-[var(--text-primary)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  }`}
+                >
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full bg-[var(--primary)] transition-opacity duration-200 ${
+                      isActive ? "opacity-100" : "opacity-0"
+                    }`}
+                    aria-hidden="true"
                   />
-                )}
-              </a>
-            </li>
-          ))}
+                  {link.label}
+                </a>
+              </li>
+            )
+          })}
         </ul>
 
-        <div className="flex items-center gap-4">
-          <LandingLinkButton to="/login" variant="ghost" className="hidden sm:inline-flex !px-4 !py-2">
+        <div className="flex items-center gap-2">
+          <LandingLinkButton to="/login" variant="ghost" className="hidden sm:inline-flex !px-3 !py-2">
             Sign in
           </LandingLinkButton>
-          <Magnetic strength={0.3} className="hidden sm:inline-block">
-            <LandingLinkButton to="/signup" variant="primary" className="!px-4 !py-2">
-              Get started
-            </LandingLinkButton>
-          </Magnetic>
+          <LandingLinkButton to="/signup" variant="outline" className="hidden sm:inline-flex !px-4 !py-2">
+            Get started
+          </LandingLinkButton>
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
@@ -85,7 +84,7 @@ export function LandingNav() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="md:hidden overflow-hidden border-t border-[var(--border-subtle)] bg-[var(--background)]/95 backdrop-blur-md"
+            className="md:hidden overflow-hidden border-t border-[var(--border-subtle)] bg-[var(--background)]"
           >
             <ul className="container flex flex-col gap-1 py-4">
               {LINKS.map((link) => (
@@ -93,8 +92,11 @@ export function LandingNav() {
                   <a
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className="block py-3 text-[12px] uppercase tracking-[0.18em] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                    className="flex items-center gap-2 py-3 text-[13px] tracking-[-0.01em] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
                   >
+                    {active === link.id && (
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" aria-hidden="true" />
+                    )}
                     {link.label}
                   </a>
                 </li>

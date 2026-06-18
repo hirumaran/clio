@@ -15,7 +15,7 @@ export function LandingTestimonial() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6, ease: EASE }}
-            className="block text-[6rem] md:text-[8rem] leading-none font-serif text-[var(--primary)] opacity-40 select-none"
+            className="block text-[6rem] md:text-[8rem] leading-none tracking-[-0.04em] text-[var(--primary)] opacity-50 select-none"
             aria-hidden="true"
           >
             &ldquo;
@@ -53,7 +53,7 @@ export function LandingTestimonial() {
             className="mt-12 md:mt-16"
           >
             <p className="text-base font-medium text-[var(--text-primary)]">Sarah Chen</p>
-            <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+            <p className="mt-1 text-[13px] tracking-[-0.01em] text-[var(--text-muted)]">
               Theatre Director, Newport High School
             </p>
           </motion.footer>

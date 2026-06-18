@@ -46,7 +46,7 @@ export function LandingTrust() {
                     value={metric.value}
                     className="text-3xl md:text-4xl font-light tracking-tight text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary)]"
                   />
-                  <span className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                  <span className="text-[13px] tracking-[-0.01em] text-[var(--text-muted)]">
                     {metric.label}
                   </span>
                 </motion.div>

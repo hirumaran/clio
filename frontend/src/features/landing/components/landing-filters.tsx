@@ -40,7 +40,7 @@ export function LandingFilters() {
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: i * 0.04 }}
                 onClick={() => setActive(cap.name)}
                 whileTap={{ scale: 0.96 }}
-                className={`relative px-5 py-2.5 rounded-full border text-[12px] uppercase tracking-[0.14em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${
+                className={`relative px-5 py-2.5 rounded-full border text-[13px] tracking-[-0.01em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)] ${
                   selected
                     ? "border-transparent text-[var(--background)]"
                     : "border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--text-primary)] hover:text-[var(--text-primary)]"

@@ -431,6 +431,122 @@
   scroll-margin-top: 5rem;
 }
 
+/* Ambient depth: a soft accent aurora + film grain layered behind the
+   landing content so the flat dark surface reads with atmosphere.
+   Both layers are scoped, fixed, and non-interactive. */
+.landing-root {
+  position: relative;
+}
+
+.landing-aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.landing-aurora::before,
+.landing-aurora::after {
+  content: "";
+  position: absolute;
+  width: 60vw;
+  height: 60vw;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.landing-aurora::before {
+  top: -20vw;
+  left: -10vw;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--primary) 28%, transparent),
+    transparent 70%
+  );
+  animation: auroraDriftA 24s ease-in-out infinite alternate;
+}
+
+.landing-aurora::after {
+  bottom: -25vw;
+  right: -10vw;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--primary) 18%, transparent),
+    transparent 70%
+  );
+  animation: auroraDriftB 30s ease-in-out infinite alternate;
+}
+
+@keyframes auroraDriftA {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(8vw, 6vw, 0) scale(1.15);
+  }
+}
+
+@keyframes auroraDriftB {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-7vw, -5vw, 0) scale(0.95);
+  }
+}
+
+/* Fine film grain — subtle texture so large flat panels feel filmic. */
+.landing-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Infinite, hover-pausable marquee track. */
+.marquee__track {
+  animation-name: marqueeScroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.marquee:hover .marquee__track {
+  animation-play-state: paused;
+}
+@keyframes marqueeScroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* Tactile card lift used across feature/stat tiles. */
+.landing-lift {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.landing-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Cursor-tracked spotlight surface (hero). The radial position is driven
+   by --mx/--my custom properties updated on pointer move. */
+.landing-spotlight {
+  background: radial-gradient(
+    420px circle at var(--mx, 50%) var(--my, 40%),
+    color-mix(in srgb, var(--primary) 14%, transparent),
+    transparent 60%
+  );
+  transition: opacity 0.4s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing-root *,
   .landing-root *::before,

@@ -1,18 +1,32 @@
-import { motion } from "framer-motion"
+import { useRef } from "react"
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion"
+
+const EASE = [0.22, 1, 0.36, 1] as const
 
 /**
  * Architectural showcase panel.
- * Clean geometric composition with no stock photography.
+ * A geometric "district map" whose connections draw in on scroll and
+ * whose blocks drift at different depths for parallax. No stock imagery.
  */
 export function LandingShowcase() {
+  const ref = useRef<HTMLDivElement>(null)
+  const reduce = useReducedMotion()
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] })
+
+  // Parallax depths for the three feature blocks.
+  const y1 = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [40, -40])
+  const y2 = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [80, -60])
+  const y3 = useTransform(scrollYProgress, [0, 1], reduce ? [0, 0] : [20, -30])
+
   return (
     <section className="w-full">
       <div className="container">
         <motion.div
+          ref={ref}
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.9, ease: EASE }}
           className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden border border-[var(--border-default)] bg-[var(--bg-muted)]"
         >
           <svg
@@ -26,27 +40,56 @@ export function LandingShowcase() {
                 <rect width="24" height="24" fill="transparent" />
                 <circle cx="2" cy="2" r="1" fill="var(--text-muted)" opacity="0.35" />
               </pattern>
-              <linearGradient id="showcase-fade" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--background)" stopOpacity="0" />
-                <stop offset="100%" stopColor="var(--background)" stopOpacity="0.85" />
+              <linearGradient id="showcase-gold" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.02" />
               </linearGradient>
             </defs>
 
             <rect width="1200" height="514" fill="url(#showcase-dots)" />
 
-            <rect x="80" y="80" width="360" height="360" fill="none" stroke="var(--border-default)" strokeWidth="0.5" opacity="0.4" />
-            <rect x="420" y="80" width="360" height="360" fill="var(--bg-raised)" opacity="0.5" />
-            <rect x="760" y="80" width="360" height="360" fill="none" stroke="var(--border-default)" strokeWidth="0.5" opacity="0.4" />
+            {/* Three zones */}
+            <rect x="80" y="80" width="360" height="360" fill="none" stroke="var(--border-default)" strokeWidth="0.5" opacity="0.45" />
+            <rect x="420" y="80" width="360" height="360" fill="url(#showcase-gold)" stroke="var(--primary)" strokeWidth="0.5" opacity="0.6" />
+            <rect x="760" y="80" width="360" height="360" fill="none" stroke="var(--border-default)" strokeWidth="0.5" opacity="0.45" />
 
-            <line x1="420" y1="80" x2="420" y2="440" stroke="var(--border-default)" strokeWidth="0.5" opacity="0.3" />
-            <line x1="780" y1="80" x2="780" y2="440" stroke="var(--border-default)" strokeWidth="0.5" opacity="0.3" />
+            {/* Connecting lines draw on scroll */}
+            <motion.path
+              d="M260 260 L600 260 L940 260"
+              fill="none"
+              stroke="var(--primary)"
+              strokeWidth="1"
+              style={{ pathLength: reduce ? 1 : scrollYProgress, opacity: 0.55 }}
+            />
+            <motion.path
+              d="M600 80 L600 440"
+              fill="none"
+              stroke="var(--border-default)"
+              strokeWidth="0.5"
+              style={{ pathLength: reduce ? 1 : scrollYProgress, opacity: 0.3 }}
+            />
 
-            <rect x="100" y="100" width="80" height="80" fill="var(--bg-raised)" opacity="0.7" />
-            <rect x="620" y="120" width="120" height="120" fill="var(--bg-raised)" opacity="0.7" />
-            <rect x="940" y="180" width="160" height="160" fill="var(--bg-raised)" opacity="0.7" />
-
-            <line x1="0" y1="440" x2="1200" y2="440" stroke="var(--border-default)" strokeWidth="0.5" opacity="0.3" />
+            {/* Junction nodes */}
+            {[260, 600, 940].map((cx) => (
+              <motion.circle
+                key={cx}
+                cx={cx}
+                cy={260}
+                r="4"
+                fill="var(--primary)"
+                initial={{ scale: 0 }}
+                whileInView={{ scale: [0, 1.4, 1] }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, ease: EASE, delay: 0.2 + (cx / 1200) * 0.5 }}
+                style={{ transformOrigin: `${cx}px 260px` }}
+              />
+            ))}
           </svg>
+
+          {/* Parallax floating blocks */}
+          <motion.div style={{ y: y1 }} className="absolute left-[8%] top-[18%] h-16 w-16 md:h-24 md:w-24 border border-[var(--border-default)] bg-[var(--bg-raised)]/70 backdrop-blur-sm" />
+          <motion.div style={{ y: y2 }} className="absolute left-[50%] top-[24%] h-20 w-20 md:h-28 md:w-28 border border-[var(--primary)]/40 bg-[var(--bg-raised)]/70 backdrop-blur-sm" />
+          <motion.div style={{ y: y3 }} className="absolute left-[78%] top-[34%] h-24 w-24 md:h-32 md:w-32 border border-[var(--border-default)] bg-[var(--bg-raised)]/70 backdrop-blur-sm" />
 
           <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-transparent to-transparent" />
 

@@ -1,6 +1,11 @@
 import { motion } from "framer-motion"
 
+const EASE = [0.22, 1, 0.36, 1] as const
+const QUOTE = "Clio turned our storage closet into a shared asset for the entire district."
+
 export function LandingTestimonial() {
+  const words = QUOTE.split(" ")
+
   return (
     <section className="py-32 md:py-48 lg:py-56">
       <div className="container">
@@ -9,28 +14,42 @@ export function LandingTestimonial() {
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="block text-[6rem] md:text-[8rem] leading-none font-serif text-[var(--text-muted)] select-none"
+            transition={{ duration: 0.6, ease: EASE }}
+            className="block text-[6rem] md:text-[8rem] leading-none font-serif text-[var(--primary)] opacity-40 select-none"
             aria-hidden="true"
           >
-            "
+            &ldquo;
           </motion.span>
 
-          <motion.blockquote
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-            className="text-2xl md:text-4xl lg:text-5xl leading-snug font-light text-[var(--text-primary)] -mt-16 md:-mt-20"
-          >
-            Clio turned our storage closet into a shared asset for the entire district.
-          </motion.blockquote>
+          <blockquote className="text-2xl md:text-4xl lg:text-5xl leading-snug font-light text-[var(--text-primary)] -mt-16 md:-mt-20">
+            <motion.span
+              className="inline"
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ staggerChildren: 0.045 }}
+            >
+              {words.map((word, i) => (
+                <motion.span
+                  key={`${word}-${i}`}
+                  className="inline-block"
+                  variants={{
+                    hidden: { opacity: 0, y: "0.4em" },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={{ duration: 0.5, ease: EASE }}
+                >
+                  {word}&nbsp;
+                </motion.span>
+              ))}
+            </motion.span>
+          </blockquote>
 
           <motion.footer
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
+            transition={{ duration: 0.6, ease: EASE, delay: 0.25 }}
             className="mt-12 md:mt-16"
           >
             <p className="text-base font-medium text-[var(--text-primary)]">Sarah Chen</p>

@@ -95,13 +95,18 @@ export const LandingLabel = ({ children, htmlFor, className = "" }: { children: 
   )
 }
 
-export const SectionWrapper = ({ children, className = "", id }: { children: ReactNode; className?: string; id?: string }) => {
-  return (
-    <section id={id} className={`py-24 md:py-36 lg:py-44 ${className}`}>
-      {children}
-    </section>
-  )
-}
+type SectionWrapperProps = React.HTMLAttributes<HTMLElement> & { children: ReactNode }
+
+export const SectionWrapper = forwardRef<HTMLElement, SectionWrapperProps>(
+  ({ children, className = "", ...props }, ref) => {
+    return (
+      <section ref={ref} className={`py-24 md:py-36 lg:py-44 ${className}`} {...props}>
+        {children}
+      </section>
+    )
+  }
+)
+SectionWrapper.displayName = "SectionWrapper"
 
 export const Eyebrow = ({ children, className = "" }: { children: ReactNode; className?: string }) => {
   return (

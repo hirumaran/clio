@@ -1,4 +1,5 @@
 import { MotionConfig } from "framer-motion"
+import { ScrollProgress } from "@/features/landing/components/landing-motion"
 import { LandingNav } from "@/features/landing/components/landing-nav"
 import { LandingHero } from "@/features/landing/components/landing-hero"
 import { LandingFilters } from "@/features/landing/components/landing-filters"
@@ -20,8 +21,11 @@ export default function LandingPage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="landing-root min-h-screen overflow-x-hidden bg-[var(--background)] text-[var(--text-primary)]">
+        <div className="landing-aurora" aria-hidden="true" />
+        <div className="landing-grain" aria-hidden="true" />
+        <ScrollProgress />
         <LandingNav />
-        <main>
+        <main className="relative z-10">
           <LandingHero />
           <LandingFilters />
           <LandingShowcase />

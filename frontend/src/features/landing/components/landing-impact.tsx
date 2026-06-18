@@ -1,5 +1,6 @@
 import { motion } from "framer-motion"
 import { SectionWrapper, Eyebrow } from "./landing-primitives"
+import { CountUp } from "./landing-motion"
 
 const STATS = [
   { value: "40%", label: "Waste reduction" },
@@ -33,9 +34,12 @@ export function LandingImpact() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: i * 0.08 }}
-              className="bg-[var(--bg-muted)] p-8 md:p-10"
+              className="landing-lift group bg-[var(--bg-muted)] p-8 md:p-10 hover:bg-[var(--bg-raised)]"
             >
-              <p className="text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-[var(--text-primary)]">{stat.value}</p>
+              <CountUp
+                value={stat.value}
+                className="block text-5xl md:text-6xl lg:text-7xl font-light tracking-tight text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary)]"
+              />
               <p className="mt-4 text-[11px] uppercase tracking-[0.2em] text-[var(--text-muted)]">{stat.label}</p>
             </motion.div>
           ))}

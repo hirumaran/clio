@@ -1,5 +1,6 @@
 import { motion } from "framer-motion"
 import { SectionWrapper, Eyebrow } from "./landing-primitives"
+import { CountUp } from "./landing-motion"
 
 const SUPPORT_METRICS = [
   { value: "24h", label: "Average response" },
@@ -20,9 +21,11 @@ export function LandingTrust() {
             className="lg:col-span-7"
           >
             <Eyebrow className="mb-6">Enterprise trust</Eyebrow>
-            <p className="text-[8rem] md:text-[12rem] lg:text-[16rem] leading-[0.85] font-light tracking-tighter text-[var(--text-primary)]">
-              98%
-            </p>
+            <CountUp
+              value="98%"
+              duration={2}
+              className="block text-[8rem] md:text-[12rem] lg:text-[16rem] leading-[0.85] font-light tracking-tighter text-[var(--text-primary)]"
+            />
             <p className="mt-6 text-xl md:text-2xl leading-relaxed text-[var(--text-secondary)] max-w-lg">
               Of resource requests are successfully fulfilled when schools share inventory through Clio.
             </p>
@@ -37,11 +40,12 @@ export function LandingTrust() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: i * 0.08 }}
-                  className="flex items-baseline justify-between py-8 border-b border-[var(--border-default)]"
+                  className="group flex items-baseline justify-between py-8 border-b border-[var(--border-default)] transition-colors hover:border-[var(--primary)]"
                 >
-                  <span className="text-3xl md:text-4xl font-light tracking-tight text-[var(--text-primary)]">
-                    {metric.value}
-                  </span>
+                  <CountUp
+                    value={metric.value}
+                    className="text-3xl md:text-4xl font-light tracking-tight text-[var(--text-primary)] transition-colors group-hover:text-[var(--primary)]"
+                  />
                   <span className="text-[11px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
                     {metric.label}
                   </span>

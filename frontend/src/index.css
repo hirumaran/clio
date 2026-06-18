@@ -1,5 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&display=swap");
-
+/* Web fonts are loaded once, preconnected, from index.html — keeping them out
+   of CSS avoids a render-blocking @import. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -235,8 +235,12 @@
     color: var(--text-primary);
   }
 
+  /* Keyboard-only focus indicator (WCAG 2.4.7). Mouse/touch focus stays clean
+     because :focus-visible only matches keyboard interaction. Buttons opt out
+     via their own ring (focus-visible:outline-none + ring utilities). */
   :focus-visible {
-    outline: none;
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 }
 
@@ -336,9 +340,10 @@
 /* ─── Landing page — "The Working Theatre" warm-gallery theme ───
    A cinematic performing-arts gallery: warm cream canvas, obsidian type,
    white elevated cards, hairline warm borders, and one ember-orange accent
-   that reads as stage light. Tokens are scoped to .landing-root and
-   intentionally override the global (and dark) theme — the cream canvas is
-   the signature, so the landing never inverts with the app's dark mode. */
+   that reads as stage light. Tokens are scoped to .landing-root so the
+   landing owns its palette independently of the app. The cream canvas is the
+   default ("house lights up"); the stage-light pull chain toggles an opt-in
+   warm-dark variant (.dark .landing-root, "house lights down") below. */
 .landing-root {
   position: relative;
 
@@ -347,9 +352,11 @@
   --foreground: #14130f;       /* warm obsidian text */
   --primary: #14130f;          /* primary action surface (high-contrast obsidian) */
   --primary-foreground: #faf6ef;
+  --primary-hover: #000000;    /* primary button hover (token so it inverts in dark) */
 
   --ember: #fa5c40;            /* the single chromatic accent — stage light */
   --ember-wash: #fde9e3;       /* soft ember surface tint */
+  --ring: var(--ember);        /* keyboard focus ring matches the warm theme */
   --stage: #14120d;            /* deep warm-black cinematic section */
   --stage-soft: #211e16;
 
@@ -371,6 +378,8 @@
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   color: var(--text-secondary);
   background: var(--background);
+  /* Smooth canvas cross-fade for browsers without the View Transitions API. */
+  transition: background-color 0.6s ease, color 0.5s ease;
 }
 
 .landing-root h1,
@@ -463,6 +472,54 @@
     rgba(250, 92, 64, 0.06) 38%,
     rgba(20, 18, 13, 0) 72%
   );
+}
+
+/* ─── House lights down — opt-in warm-dark variant ───
+   Driven by the canonical class-based theme (html.dark) via the stage-light
+   pull chain. The cream canvas inverts to a warm near-black "stage": cream
+   ink, elevated charcoal cards, and a brighter ember that still sings against
+   the dark. Mirrors every color token defined on .landing-root above so the
+   whole landing inverts cohesively (the landing previously ignored .dark). */
+.dark .landing-root {
+  --background: #161310;       /* warm near-black canvas — house lights down */
+  --foreground: #f4efe5;       /* warm cream ink */
+  --primary: #f4efe5;          /* primary surface inverts to light on dark */
+  --primary-foreground: #161310;
+  --primary-hover: #e7e1d3;    /* dim-cream hover for the inverted primary button */
+
+  --ember: #ff6a4d;            /* a touch brighter so the accent pops on dark */
+  --ember-wash: #2e1812;       /* deep ember-tinted surface */
+
+  --stage: #100e0a;            /* deepest warm-black — the cinematic CTA panel */
+  --stage-soft: #1a1711;
+
+  --text-primary: #f4efe5;
+  --text-secondary: #c9c1b2;   /* warm light-gray body copy */
+  --text-muted: #938b7c;       /* warm muted labels / captions */
+
+  --bg-base: #161310;
+  --bg-raised: #211d17;        /* elevated card surface — warm charcoal */
+  --bg-surface: #211d17;
+  --bg-subtle: #1b1813;        /* recessed warm panel */
+  --bg-muted: #24201a;
+
+  --border-default: #322d24;   /* warm hairline on dark */
+  --border-subtle: #26221b;
+  --border-strong: #443d30;
+}
+
+/* Frosted nav pill — warm-dark glass in dark mode. */
+.dark .landing-pill {
+  background: rgba(28, 24, 19, 0.72);
+  border-color: var(--border-default);
+}
+
+/* Elevated cards — deepen the shadow so the lift still reads on the dark canvas. */
+.dark .landing-float-card {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.30),
+    0 14px 30px -18px rgba(0, 0, 0, 0.55),
+    0 40px 80px -40px rgba(0, 0, 0, 0.65);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -67,7 +67,7 @@ const baseBtn =
   "group inline-flex items-center justify-center gap-2 rounded-full text-[15px] font-medium tracking-[-0.01em] px-6 py-3 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ember)] focus-visible:ring-offset-[var(--background)] disabled:opacity-50"
 
 const variantBtn: Record<ButtonVariant, string> = {
-  primary: "bg-[var(--foreground)] text-[var(--primary-foreground)] hover:bg-[#000]",
+  primary: "bg-[var(--foreground)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover,#000)]",
   secondary:
     "bg-transparent text-[var(--text-primary)] border border-[var(--border-strong)] hover:border-[var(--foreground)] hover:bg-[var(--bg-subtle)]",
   ember: "bg-[var(--ember)] text-white hover:brightness-[0.94]",

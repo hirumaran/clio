@@ -1,15 +1,11 @@
-import { Marquee, Reveal } from "./landing-motion"
+import { Reveal } from "./landing-motion"
 import { Container } from "./landing-primitives"
 
-const DISTRICTS = [
-  "Mapleton District",
-  "Riverside USD",
-  "Northgate Schools",
-  "Cedar Valley",
-  "Harborview ISD",
-  "Westbrook County",
-  "Summit Public",
-  "Fairhaven Arts",
+const SCHOOLS = [
+  "Sammamish High",
+  "Newport High",
+  "Interlake High",
+  "Big Picture School",
 ]
 
 export function LandingLogos() {
@@ -18,20 +14,21 @@ export function LandingLogos() {
       <Container>
         <Reveal>
           <p className="mb-9 text-center text-[13px] tracking-[-0.01em] text-[var(--text-muted)]">
-            Trusted by drama departments across{" "}
-            <span className="font-medium text-[var(--text-secondary)]">40+ school districts</span>
+            Built for{" "}
+            <span className="font-medium text-[var(--text-secondary)]">Bellevue School District</span>{" "}
+            — piloting with four drama departments
           </p>
         </Reveal>
-        <Marquee speed={48}>
-          {DISTRICTS.map((d) => (
+        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-5 sm:gap-x-16">
+          {SCHOOLS.map((s) => (
             <span
-              key={d}
+              key={s}
               className="select-none whitespace-nowrap text-[19px] font-semibold tracking-[-0.03em] text-[var(--text-primary)] opacity-45 transition-opacity duration-300 hover:opacity-100"
             >
-              {d}
+              {s}
             </span>
           ))}
-        </Marquee>
+        </div>
       </Container>
     </section>
   )

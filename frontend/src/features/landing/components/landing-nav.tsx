@@ -66,13 +66,18 @@ export function LandingNav() {
           >
             Sign in
           </Link>
-          <Button to="/signup" className="hidden px-5 py-2.5 text-[14px] sm:inline-flex">
+          <Button
+            to="/signup"
+            className="inline-flex px-4 py-2 text-[13.5px] sm:px-5 sm:py-2.5 sm:text-[14px]"
+          >
             Get started
           </Button>
           <button
             onClick={() => setOpen((v) => !v)}
             className="flex h-10 w-10 items-center justify-center rounded-full text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-subtle)] lg:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            aria-controls="mobile-nav-menu"
           >
             {open ? <X size={18} strokeWidth={1.75} /> : <Menu size={18} strokeWidth={1.75} />}
           </button>
@@ -82,6 +87,7 @@ export function LandingNav() {
       <AnimatePresence>
         {open && (
           <motion.div
+            id="mobile-nav-menu"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}

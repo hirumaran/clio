@@ -28,11 +28,18 @@ export function LandingTestimonial() {
   return (
     <Section className="bg-[var(--bg-subtle)]">
       <Container>
-        <Reveal>
-          <Eyebrow>Loved by theatre educators</Eyebrow>
-        </Reveal>
+        <div className="max-w-2xl">
+          <Reveal>
+            <Eyebrow>Loved by theatre educators</Eyebrow>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <h2 className="mt-5 text-[clamp(2rem,4.6vw,3.4rem)] font-semibold leading-[1.02] tracking-[-0.035em] text-[var(--text-primary)]">
+              Straight from the wings.
+            </h2>
+          </Reveal>
+        </div>
 
-        <div className="mt-8 grid gap-4 lg:grid-cols-12">
+        <div className="mt-10 grid gap-4 lg:grid-cols-12">
           {/* Feature quote */}
           <Reveal delay={0.05} className="lg:col-span-7">
             <figure className="landing-float-card flex h-full flex-col justify-between p-8 sm:p-10">

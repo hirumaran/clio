@@ -1,7 +1,7 @@
 import { motion } from "framer-motion"
 import { Shirt, Wand2, Lightbulb, Lock } from "lucide-react"
 import { Container, Section, Eyebrow } from "./landing-primitives"
-import { Reveal } from "./landing-motion"
+import { Reveal, Stagger, StaggerItem } from "./landing-motion"
 
 const IDLE = [
   { icon: Shirt, label: "32 costumes", note: "last used · 2019" },
@@ -40,23 +40,21 @@ export function LandingProblem() {
               </p>
             </Reveal>
 
-            <Reveal delay={0.2}>
-              <div className="mt-9 flex flex-wrap gap-x-10 gap-y-5">
-                {[
-                  ["~$3,100", "wasted per school each year on duplicates"],
-                  ["68%", "of inventory never shared between schools"],
-                ].map(([stat, label]) => (
-                  <div key={stat} className="max-w-[180px]">
-                    <div className="lp-tnum text-[28px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">
-                      {stat}
-                    </div>
-                    <div className="mt-1 text-[13px] leading-snug text-[var(--text-muted)]">
-                      {label}
-                    </div>
+            <Stagger delay={0.1} stagger={0.12} className="mt-9 flex flex-wrap gap-x-10 gap-y-5">
+              {[
+                ["~$3,100", "wasted per school each year on duplicates"],
+                ["68%", "of inventory never shared between schools"],
+              ].map(([stat, label]) => (
+                <StaggerItem key={stat} className="max-w-[180px]">
+                  <div className="lp-tnum text-[28px] font-semibold tracking-[-0.03em] text-[var(--text-primary)]">
+                    {stat}
                   </div>
-                ))}
-              </div>
-            </Reveal>
+                  <div className="mt-1 text-[13px] leading-snug text-[var(--text-muted)]">
+                    {label}
+                  </div>
+                </StaggerItem>
+              ))}
+            </Stagger>
           </div>
 
           {/* "In the dark" panel */}

@@ -6,6 +6,19 @@ import { ResourceCard, Float, SchoolDot, type Resource } from "./landing-ui"
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
+/* Headline entrance — lines rise and fade in sequence. Under reduced motion
+   Framer keeps the opacity fade and drops the y-transform automatically. */
+const HEADLINE_LINES = ["The theatre your", "district already"]
+
+const headlineContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.06 } },
+}
+const headlineLine = {
+  hidden: { opacity: 0, y: "0.5em" },
+  show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
+}
+
 const HERO_CARDS: { resource: Resource; style: string; float: number; delay: number }[] = [
   {
     resource: {
@@ -72,16 +85,17 @@ export function LandingHero() {
             </motion.span>
 
             <motion.h1
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: EASE, delay: 0.06 }}
+              initial="hidden"
+              animate="show"
+              variants={headlineContainer}
               className="mt-6 text-[clamp(2.6rem,6.4vw,4.6rem)] font-semibold leading-[0.98] tracking-[-0.04em] text-[var(--text-primary)]"
             >
-              The theatre your
-              <br />
-              district already
-              <br />
-              <span className="relative whitespace-nowrap">
+              {HEADLINE_LINES.map((line) => (
+                <motion.span key={line} variants={headlineLine} className="block">
+                  {line}
+                </motion.span>
+              ))}
+              <motion.span variants={headlineLine} className="relative block w-fit whitespace-nowrap">
                 owns.
                 <svg
                   className="absolute -bottom-2 left-0 w-[2.6em]"
@@ -99,7 +113,7 @@ export function LandingHero() {
                     transition={{ duration: 0.9, ease: EASE, delay: 0.7 }}
                   />
                 </svg>
-              </span>
+              </motion.span>
             </motion.h1>
 
             <motion.p

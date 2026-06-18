@@ -62,7 +62,7 @@ export function LandingCta() {
 
           <Reveal delay={0.15}>
             {state === "done" ? (
-              <div className="mx-auto mt-10 flex w-fit items-center gap-2.5 rounded-full bg-[rgba(250,246,239,0.1)] px-5 py-3.5 text-[15px] text-[var(--primary-foreground)]">
+              <div role="status" className="mx-auto mt-10 flex w-fit items-center gap-2.5 rounded-full bg-[rgba(250,246,239,0.1)] px-5 py-3.5 text-[15px] text-[var(--primary-foreground)]">
                 <span
                   className="flex h-6 w-6 items-center justify-center rounded-full"
                   style={{ background: "var(--ember)" }}
@@ -87,6 +87,8 @@ export function LandingCta() {
                   placeholder="you@school.edu"
                   className="h-12 flex-1 rounded-full border border-[rgba(250,246,239,0.18)] bg-[rgba(250,246,239,0.06)] px-5 text-[15px] text-[var(--primary-foreground)] placeholder:text-[rgba(250,246,239,0.4)] focus:border-[var(--ember)] focus:outline-none"
                   aria-label="Work email"
+                  aria-invalid={state === "error"}
+                  aria-describedby={state === "error" ? "cta-email-error" : undefined}
                 />
                 <motion.button
                   type="submit"
@@ -110,7 +112,9 @@ export function LandingCta() {
           </Reveal>
 
           {state === "error" && (
-            <p className="mt-3 text-[13px] text-[#ffb4a4]">{error}</p>
+            <p id="cta-email-error" role="alert" className="mt-3 text-[13px] text-[#ffb4a4]">
+              {error}
+            </p>
           )}
 
           <Reveal delay={0.2}>

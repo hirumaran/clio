@@ -22,7 +22,7 @@ export default function AuthLayout() {
         </div>
 
         <p className="text-xs text-primary-foreground/50">
-          Trusted by drama departments across the country
+          Built for drama departments in Bellevue School District
         </p>
       </div>
 

@@ -1,14 +1,14 @@
 import { motion } from "framer-motion"
 import { Check, CheckCircle2, ShieldCheck, Calendar } from "lucide-react"
 import { Container, Section, Eyebrow, Button } from "./landing-primitives"
-import { Reveal } from "./landing-motion"
+import { Reveal, Stagger, StaggerItem } from "./landing-motion"
 import { SchoolDot } from "./landing-ui"
 
 function Bullets({ items }: { items: string[] }) {
   return (
-    <ul className="mt-7 space-y-3.5">
+    <Stagger as="ul" stagger={0.07} delay={0.1} className="mt-7 space-y-3.5">
       {items.map((it) => (
-        <li key={it} className="flex items-start gap-3">
+        <StaggerItem as="li" key={it} y={12} className="flex items-start gap-3">
           <span
             className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
             style={{ background: "var(--ember-wash)" }}
@@ -16,9 +16,9 @@ function Bullets({ items }: { items: string[] }) {
             <Check size={13} strokeWidth={2.4} style={{ color: "#b23a26" }} />
           </span>
           <span className="text-[15.5px] leading-[1.5] text-[var(--text-secondary)]">{it}</span>
-        </li>
+        </StaggerItem>
       ))}
-    </ul>
+    </Stagger>
   )
 }
 
@@ -154,16 +154,14 @@ export function LandingAudiences() {
                   calm way to borrow what you need — without the group-text chaos.
                 </p>
               </Reveal>
-              <Reveal delay={0.15}>
-                <Bullets
-                  items={[
-                    "Digitize your storage once — photos, condition, location, categories.",
-                    "Find any costume, prop, or script available across the district in seconds.",
-                    "Coordinate borrows, handoffs, and returns in one tidy thread.",
-                    "Plan a production around what you can actually get your hands on.",
-                  ]}
-                />
-              </Reveal>
+              <Bullets
+                items={[
+                  "Digitize your storage once — photos, condition, location, categories.",
+                  "Find any costume, prop, or script available across the district in seconds.",
+                  "Coordinate borrows, handoffs, and returns in one tidy thread.",
+                  "Plan a production around what you can actually get your hands on.",
+                ]}
+              />
               <Reveal delay={0.2}>
                 <Button to="/signup" variant="secondary" className="mt-8">
                   Start with your closet
@@ -193,16 +191,14 @@ export function LandingAudiences() {
                   and reporting that justifies the budget at the next board meeting.
                 </p>
               </Reveal>
-              <Reveal delay={0.15}>
-                <Bullets
-                  items={[
-                    "Onboard and manage every school's program from one console.",
-                    "Control users, roles, and permissions with district-wide policy.",
-                    "Report on utilization, savings, and cross-school collaboration.",
-                    "Turn duplicate spending into shared assets — and prove the ROI.",
-                  ]}
-                />
-              </Reveal>
+              <Bullets
+                items={[
+                  "Onboard and manage every school's program from one console.",
+                  "Control users, roles, and permissions with district-wide policy.",
+                  "Report on utilization, savings, and cross-school collaboration.",
+                  "Turn duplicate spending into shared assets — and prove the ROI.",
+                ]}
+              />
               <Reveal delay={0.2}>
                 <Button to="/signup" variant="secondary" className="mt-8">
                   Book a district walkthrough

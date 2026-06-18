@@ -210,6 +210,67 @@ export function Reveal({
 }
 
 /* ──────────────────────────────────────────────────────────────
+   Stagger / StaggerItem — orchestrated scroll reveal. The parent
+   cascades its children in sequence instead of a single block fade.
+   Pair them: <Stagger><StaggerItem/>…</Stagger>. Under reduced motion
+   Framer keeps the fade and drops the y-transform.
+   ────────────────────────────────────────────────────────────── */
+export function Stagger({
+  children,
+  delay = 0,
+  stagger = 0.08,
+  as = "div",
+  className = "",
+}: {
+  children: ReactNode
+  delay?: number
+  stagger?: number
+  as?: ElementType
+  className?: string
+}) {
+  const MotionTag = motion[as as keyof typeof motion] as ElementType
+  return (
+    <MotionTag
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={{
+        hidden: {},
+        show: { transition: { staggerChildren: stagger, delayChildren: delay } },
+      }}
+      className={className}
+    >
+      {children}
+    </MotionTag>
+  )
+}
+
+export function StaggerItem({
+  children,
+  y = 16,
+  as = "div",
+  className = "",
+}: {
+  children: ReactNode
+  y?: number
+  as?: ElementType
+  className?: string
+}) {
+  const MotionTag = motion[as as keyof typeof motion] as ElementType
+  return (
+    <MotionTag
+      variants={{
+        hidden: { opacity: 0, y },
+        show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+      }}
+      className={className}
+    >
+      {children}
+    </MotionTag>
+  )
+}
+
+/* ──────────────────────────────────────────────────────────────
    useScrollSpy — returns the id of the section currently in view.
    ────────────────────────────────────────────────────────────── */
 export function useScrollSpy(ids: string[], offset = 120) {

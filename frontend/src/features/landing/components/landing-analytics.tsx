@@ -1,9 +1,50 @@
-import { motion } from "framer-motion"
+import { useState, type ReactNode } from "react"
+import { motion, useMotionValue, useMotionTemplate } from "framer-motion"
 import { TrendingUp, Repeat2, Clock } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { Container, Section, Eyebrow } from "./landing-primitives"
 import { Reveal, CountUp } from "./landing-motion"
 
 const EASE = [0.22, 1, 0.36, 1] as const
+
+/* Premium pointer-tracking spotlight — a soft ember glow tracks the cursor
+   across the card, fading in on hover. It sits above the card fill but below
+   the content (-z-10 inside an isolated stacking context), so text and charts
+   stay crisp. Pointer-only; touch users simply never trigger it. */
+function SpotlightCard({
+  children,
+  className = "",
+}: {
+  children: ReactNode
+  className?: string
+}) {
+  const mx = useMotionValue(0)
+  const my = useMotionValue(0)
+  const [hovered, setHovered] = useState(false)
+  const background = useMotionTemplate`radial-gradient(240px circle at ${mx}px ${my}px, rgba(250, 92, 64, 0.12), transparent 72%)`
+
+  return (
+    <div
+      onMouseMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect()
+        mx.set(e.clientX - r.left)
+        my.set(e.clientY - r.top)
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className={cn("landing-float-card landing-lift relative isolate overflow-hidden", className)}
+    >
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10"
+        style={{ background }}
+        animate={{ opacity: hovered ? 1 : 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+      />
+      {children}
+    </div>
+  )
+}
 
 /* Peak-season bars — fall play + spring musical spikes. */
 const MONTHS = [
@@ -125,21 +166,21 @@ export function LandingAnalytics() {
         {/* bento */}
         <div className="mt-12 grid gap-4 lg:grid-cols-12">
           <Reveal delay={0.05} className="lg:col-span-5">
-            <div className="landing-float-card landing-lift h-full p-6">
+            <SpotlightCard className="h-full p-6">
               <UtilizationChart />
-            </div>
+            </SpotlightCard>
           </Reveal>
           <Reveal delay={0.1} className="lg:col-span-7">
-            <div className="landing-float-card landing-lift h-full p-6">
+            <SpotlightCard className="h-full p-6">
               <PeakChart />
-            </div>
+            </SpotlightCard>
           </Reveal>
 
           {STATS.map((s, i) => {
             const Icon = s.icon
             return (
               <Reveal key={s.label} delay={0.1 + i * 0.06} className="lg:col-span-4">
-                <div className="landing-float-card landing-lift flex h-full items-start gap-4 p-6">
+                <SpotlightCard className="flex h-full items-start gap-4 p-6">
                   <div
                     className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
                     style={{ background: "var(--bg-subtle)" }}
@@ -153,7 +194,7 @@ export function LandingAnalytics() {
                     </div>
                     <p className="mt-2 text-[13.5px] leading-snug text-[var(--text-muted)]">{s.label}</p>
                   </div>
-                </div>
+                </SpotlightCard>
               </Reveal>
             )
           })}

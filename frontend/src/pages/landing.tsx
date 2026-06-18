@@ -1,5 +1,6 @@
 import { MotionConfig } from "framer-motion"
 import { ScrollProgress } from "@/features/landing/components/landing-motion"
+import { ThemePullChain } from "@/features/landing/components/landing-theme-chain"
 import { LandingNav } from "@/features/landing/components/landing-nav"
 import { LandingHero } from "@/features/landing/components/landing-hero"
 import { LandingLogos } from "@/features/landing/components/landing-logos"
@@ -28,6 +29,7 @@ export default function LandingPage() {
     <MotionConfig reducedMotion="user">
       <div className="landing-root min-h-screen">
         <ScrollProgress />
+        <ThemePullChain />
         <LandingNav />
         <main className="relative z-10">
           <LandingHero />

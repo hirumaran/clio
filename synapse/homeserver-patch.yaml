@@ -21,7 +21,11 @@ database:
     cp_max: 10
 
 # Disable federation (closed BSD network - no external Matrix servers)
+# Empty whitelist refuses all remote servers; also stop the sender and don't
+# advertise the federation well-known so the federation machinery isn't active at all.
 federation_domain_whitelist: []
+send_federation: false
+serve_server_wellknown: false
 
 # Retention: keep messages for 1 year
 retention:
@@ -32,6 +36,32 @@ retention:
 
 # Media store (for file attachments)
 media_store_path: /data/media_store
+
+# Cap upload size to bound unbounded media-storage abuse on the closed network
+max_upload_size: 10M
+
+# Require an access token to download media — closes the unauthenticated
+# /_matrix/media download endpoints that can be abused as a content-distribution vector
+enable_authenticated_media: true
+
+# URL previews fetch arbitrary remote URLs (SSRF / unsolicited-fetch vector) — not needed for closed BSD chat
+url_preview_enabled: false
+
+# Rate limiting — defense against login brute-force / message flooding (Synapse defaults alone
+# are insufficient for the public-facing client API exposed through nginx)
+rc_login:
+  address:
+    per_second: 0.17
+    burst_count: 3
+  account:
+    per_second: 0.17
+    burst_count: 3
+  failed_attempts:
+    per_second: 0.17
+    burst_count: 3
+rc_message:
+  per_second: 0.5
+  burst_count: 10
 
 # Logging
 log_config: /data/matrix.calliope.bsd405.org.log.config

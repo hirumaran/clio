@@ -238,45 +238,63 @@ async function getOutgoingRequests(req, res) {
  * Item owner approves a pending request.
  */
 async function approveRequest(req, res) {
-  try {
-    const requestId = parseInt(req.params.id, 10)
-    if (Number.isNaN(requestId)) {
-      return res.status(400).json({ error: 'Invalid request ID' })
-    }
+  // Approve inside a txn with FOR UPDATE on the item row + overlap re-check so two pending requests cannot both be approved into a double-booking.
+  const requestId = parseInt(req.params.id, 10)
+  if (Number.isNaN(requestId)) {
+    return res.status(400).json({ error: 'Invalid request ID' })
+  }
 
-    const { rows } = await pool.query(
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+
+    const { rows } = await client.query(
       `SELECT br.*, i.added_by AS item_owner_id, i.name AS item_name
        FROM borrow_requests br
        JOIN items i ON br.item_id = i.id
-       WHERE br.id = $1`,
+       WHERE br.id = $1
+       FOR UPDATE OF i, br`,
       [requestId]
     )
     const request = rows[0]
     if (!request) {
-      return res.status(404).json({ error: 'Request not found' })
+      throw { status: 404, message: 'Request not found' }
     }
 
     if (request.item_owner_id !== req.user.userId) {
-      return res.status(403).json({
-        error: 'Only the item owner can approve requests',
-      })
+      throw { status: 403, message: 'Only the item owner can approve requests' }
     }
 
     if (request.status !== 'pending') {
-      return res.status(409).json({
-        error: 'Only pending requests can be approved',
-      })
+      throw { status: 409, message: 'Only pending requests can be approved' }
+    }
+
+    // Re-check overlap under the item lock so a competing already-approved/active borrow blocks this approval (double-booking guard).
+    const overlap = await client.query(
+      `SELECT id FROM borrow_requests
+       WHERE item_id = $1
+         AND id <> $2
+         AND status IN ('approved', 'active')
+         AND requested_date <= $3
+         AND return_date >= $4
+       LIMIT 1`,
+      [request.item_id, requestId, request.return_date, request.requested_date]
+    )
+    if (overlap.rows.length > 0) {
+      throw { status: 409, message: 'Item is already reserved during this date range' }
     }
 
     const ownerNote = req.body.ownerNote || null
 
-    const updated = await pool.query(
+    const updated = await client.query(
       `UPDATE borrow_requests
        SET status = 'approved', approved_at = NOW(), owner_note = $2
        WHERE id = $1
        RETURNING *`,
       [requestId, ownerNote]
     )
+
+    await client.query('COMMIT')
 
     res.status(200).json(updated.rows[0])
 
@@ -295,8 +313,18 @@ async function approveRequest(req, res) {
       link: `clio://requests/${requestId}`,
     })
   } catch (err) {
+    await client.query('ROLLBACK')
+    if (err.status) {
+      return res.status(err.status).json({ error: err.message })
+    }
+    // 23P01 = exclusion_violation from the borrow_requests overlap constraint (migration 021): surface as the standard 409 conflict.
+    if (err.code === '23P01') {
+      return res.status(409).json({ error: 'Item is already reserved during this date range' })
+    }
     console.error('[approveRequest] Error:', err)
     res.status(500).json({ error: 'Internal server error' })
+  } finally {
+    client.release()
   }
 }
 
@@ -341,13 +369,17 @@ async function rejectRequest(req, res) {
       })
     }
 
+    // Guard the transition in the UPDATE itself so a racing approve/reject can't double-mutate.
     const updated = await pool.query(
       `UPDATE borrow_requests
        SET status = 'rejected', owner_note = $2
-       WHERE id = $1
+       WHERE id = $1 AND status = 'pending'
        RETURNING *`,
       [requestId, req.body.ownerNote]
     )
+    if (updated.rowCount === 0) {
+      return res.status(409).json({ error: 'Only pending requests can be rejected' })
+    }
 
     res.status(200).json(updated.rows[0])
 
@@ -401,13 +433,17 @@ async function cancelRequest(req, res) {
       })
     }
 
+    // Guard the transition in the UPDATE itself so a racing approve/cancel can't double-mutate.
     const updated = await pool.query(
       `UPDATE borrow_requests
        SET status = 'cancelled'
-       WHERE id = $1
+       WHERE id = $1 AND status = 'pending'
        RETURNING *`,
       [requestId]
     )
+    if (updated.rowCount === 0) {
+      return res.status(409).json({ error: 'Only pending requests can be cancelled' })
+    }
 
     res.status(200).json(updated.rows[0])
 

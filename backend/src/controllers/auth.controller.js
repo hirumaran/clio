@@ -29,6 +29,24 @@ async function register(req, res) {
       return res.status(409).json({ error: 'User already exists' });
     }
 
+    // Server-verify the tenant: a claimed schoolId must reference an existing active school, and
+    // (when the school has a domain configured) the email domain must match it. The JWT tenant
+    // claim must derive from a trusted, verified value — never arbitrary client input.
+    if (schoolId) {
+      const emailDomain = String(email).toLowerCase().split('@')[1] || '';
+      const schoolCheck = await query(
+        'SELECT id, domain FROM schools WHERE id = $1 AND is_active = TRUE',
+        [schoolId]
+      );
+      const school = schoolCheck.rows[0];
+      if (!school) {
+        return res.status(400).json({ error: 'Invalid school' });
+      }
+      if (school.domain && emailDomain !== school.domain.toLowerCase()) {
+        return res.status(403).json({ error: 'Email domain does not match the selected school' });
+      }
+    }
+
     // Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 

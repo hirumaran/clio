@@ -70,6 +70,10 @@ async function generateUniqueLocalpart(firstName, lastName) {
  * Returns: { access_token, user_id, home_server, device_id }
  */
 async function provisionMatrixUser(firstName, lastName, displayName) {
+  // Fail fast on missing Matrix config so we never compute an HMAC against an empty/undefined shared secret
+  if (!HOMESERVER_URL || !SHARED_SECRET || !MATRIX_DOMAIN) {
+    throw new Error('Matrix provisioning is not configured (MATRIX_HOMESERVER_URL / MATRIX_SHARED_SECRET / MATRIX_DOMAIN)');
+  }
   const localpart = await generateUniqueLocalpart(firstName, lastName);
   // Generate a cryptographically random password — stored in DB, never shown to user
   const matrixPassword = crypto.randomBytes(32).toString('hex');

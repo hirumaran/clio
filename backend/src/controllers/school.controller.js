@@ -150,7 +150,8 @@ async function getSchoolStats(req, res) {
         COUNT(DISTINCT br.id) FILTER (WHERE br.status = 'pending')::int                  AS pending_requests,
         COUNT(DISTINCT br.id) FILTER (WHERE br.status = 'active')::int                     AS active_borrows,
         COUNT(DISTINCT br.id) FILTER (WHERE br.status = 'returned')::int                   AS completed_borrows,
-        COUNT(DISTINCT br.id) FILTER (WHERE br.status = 'overdue')::int                   AS overdue_borrows,
+        -- Derive overdue from active+past-due; a persisted status='overdue' is never written by the lifecycle, so the old filter always returned 0.
+        COUNT(DISTINCT br.id) FILTER (WHERE br.status = 'active' AND br.return_date < CURRENT_DATE)::int AS overdue_borrows,
 
         COUNT(DISTINCT u.id) FILTER (WHERE u.is_active = TRUE)::int                       AS teacher_count
 
@@ -192,7 +193,8 @@ async function getAllSchoolsStats(req, res) {
         COUNT(DISTINCT i.id)  FILTER (WHERE i.is_active = TRUE)::int              AS total_items,
         COUNT(DISTINCT br.id) FILTER (WHERE br.status = 'active')::int             AS active_borrows,
         COUNT(DISTINCT br.id) FILTER (WHERE br.status = 'pending')::int          AS pending_requests,
-        COUNT(DISTINCT br.id) FILTER (WHERE br.status = 'overdue')::int           AS overdue_borrows,
+        -- Derive overdue from active+past-due; a persisted status='overdue' is never written by the lifecycle, so the old filter always returned 0.
+        COUNT(DISTINCT br.id) FILTER (WHERE br.status = 'active' AND br.return_date < CURRENT_DATE)::int AS overdue_borrows,
         COUNT(DISTINCT u.id)  FILTER (WHERE u.is_active = TRUE)::int               AS teacher_count
       FROM schools s
       LEFT JOIN items           i  ON i.school_id        = s.id

@@ -219,7 +219,14 @@ export const useAuthStore = create<AuthState>()(
         },
       })),
       partialize: (state) => ({
-        user: state.user,
+        // Persist a sanitized user WITHOUT the Matrix credentials. The long-lived
+        // Synapse access token replays directly against the homeserver, so it must
+        // not sit at rest in localStorage where any XSS could read it. It is
+        // re-hydrated into memory on cold start via loadUser() -> /auth/me ->
+        // bootMatrix, so chat is unaffected.
+        user: state.user
+          ? { ...state.user, matrixAccessToken: undefined, matrixDeviceId: undefined }
+          : null,
         token: state.token,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,

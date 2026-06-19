@@ -49,6 +49,7 @@ import {
 } from "matrix-js-sdk"
 import type { MatrixConversation, MatrixMessage } from "@/types"
 import { getConfig } from "@/lib/config"
+import { apiFetch } from "@/lib/api"
 
 interface MatrixStore {
   client: MatrixClient | null
@@ -185,14 +186,28 @@ export const useMatrixStore = create<MatrixStore>((set, get) => ({
         }
       }
 
-      // Auto-accept invites to DM rooms
+      // Auto-accept invites ONLY for rooms the backend confirms belong to a
+      // borrow the user is party to. Without this gate, any provisioned user
+      // could /createRoom + invite another user (e.g. a student) directly
+      // against Synapse and the client would silently auto-join — an
+      // unsolicited-contact vector that bypasses borrow-approval gating.
+      // Fails closed: if the authorization check errors or denies, we do NOT join.
       client.on(sdk.RoomMemberEvent.Membership, async (_event, member) => {
-        if (member.membership === "invite" && member.userId === userId) {
-          try {
-            await client.joinRoom(member.roomId)
-          } catch (e) {
-            console.warn("[Matrix] Failed to auto-join room:", e)
+        if (member.membership !== "invite" || member.userId !== userId) return
+        try {
+          const { authorized } = await apiFetch(
+            `/requests/room-authorized?roomId=${encodeURIComponent(member.roomId)}`
+          )
+          if (!authorized) {
+            console.warn(
+              "[Matrix] Ignoring invite to a room not tied to an approved borrow:",
+              member.roomId
+            )
+            return
           }
+          await client.joinRoom(member.roomId)
+        } catch (e) {
+          console.warn("[Matrix] Auto-join authorization check failed; not joining:", e)
         }
       })
 

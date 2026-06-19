@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
   synapse:
-    image: matrixdotorg/synapse:latest
+    # Pinned (no :latest) so the deployed version is deterministic. v1.106.0 is
+    # the floor that fixes CVE-2024-37302/37303; BUMP to the current stable
+    # release on a tracked cadence: https://github.com/element-hq/synapse/releases
+    image: matrixdotorg/synapse:v1.106.0
     container_name: calliope-synapse
     restart: unless-stopped
     environment:
@@ -10,7 +13,11 @@ services:
     volumes:
       - ./data:/data
     ports:
-      - "8008:8008"
+      # Bind to loopback only — nginx (on the host) proxies to localhost:8008 and
+      # the backend reaches it over localhost. Publishing on 0.0.0.0 would expose
+      # the FULL Synapse API, including /_synapse/admin, directly on every host
+      # interface, bypassing the nginx allow/deny fence (account-takeover path).
+      - "127.0.0.1:8008:8008"
     depends_on:
       synapse-db:
         condition: service_healthy

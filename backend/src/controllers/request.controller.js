@@ -856,11 +856,44 @@ async function retryRoomSetup(req, res) {
   }
 }
 
+/**
+ * GET /api/v1/requests/room-authorized?roomId=<matrixRoomId>
+ * Server-authoritative gate for the chat client's auto-join: returns
+ * { authorized: true } only if the calling user is the borrower or the item
+ * owner of a borrow request that owns this Matrix room. This is the trusted
+ * backstop against forced/unsolicited contact via raw Matrix invites — the
+ * client must NOT auto-join a room this endpoint does not authorize.
+ */
+async function isBorrowRoomMember(req, res) {
+  try {
+    const roomId = req.query.roomId
+    if (!roomId || typeof roomId !== 'string') {
+      return res.status(400).json({ error: 'roomId is required' })
+    }
+
+    const { rows } = await pool.query(
+      `SELECT 1
+       FROM borrow_requests br
+       JOIN items i ON br.item_id = i.id
+       WHERE br.matrix_room_id = $1
+         AND (br.requester_id = $2 OR i.added_by = $2)
+       LIMIT 1`,
+      [roomId, req.user.userId]
+    )
+
+    return res.status(200).json({ authorized: rows.length > 0 })
+  } catch (err) {
+    console.error('[isBorrowRoomMember] Error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
 module.exports = {
   createRequest,
   getIncomingRequests,
   getOutgoingRequests,
   getRequestById,
+  isBorrowRoomMember,
   approveRequest,
   rejectRequest,
   cancelRequest,

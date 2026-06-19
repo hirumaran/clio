@@ -185,7 +185,7 @@ function localpartOf(matrixUserId) {
  * Synapse admin endpoint (>= 1.64.0):
  *   POST /_synapse/admin/v1/users/<localpart>/login
  */
-async function adminLoginAsUser(localpart) {
+async function adminLoginAsUser(localpart, ttlMs = 5 * 60 * 1000) {
   if (!HOMESERVER_URL) {
     throw new Error('MATRIX_HOMESERVER_URL is not configured');
   }
@@ -194,6 +194,10 @@ async function adminLoginAsUser(localpart) {
     throw new Error('MATRIX_ADMIN_TOKEN is not configured');
   }
 
+  // Bound the minted token's lifetime. Without valid_until_ms Synapse mints a
+  // NON-expiring impersonation token; passing it caps the blast radius of a
+  // leaked token. Default 5m suits the immediate server-actor uses
+  // (createBorrowRoom / redactRoomEvent); session-recovery passes a longer TTL.
   const loginRes = await fetch(
     `${HOMESERVER_URL}/_synapse/admin/v1/users/${encodeURIComponent(localpart)}/login`,
     {
@@ -202,7 +206,7 @@ async function adminLoginAsUser(localpart) {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${adminToken}`,
       },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ valid_until_ms: Date.now() + ttlMs }),
     }
   );
 
@@ -233,7 +237,9 @@ async function regenerateMatrixToken(dbUserId) {
   const matrixUserId = result.rows[0].matrix_user_id;
   const matrixDeviceId = result.rows[0].matrix_device_id;
 
-  const accessToken = await adminLoginAsUser(localpartOf(matrixUserId));
+  // ~1h: the frontend consumes this for an active chat session and can re-call
+  // /auth/matrix/refresh to renew, so it need not be long-lived.
+  const accessToken = await adminLoginAsUser(localpartOf(matrixUserId), 60 * 60 * 1000);
 
   await query(
     'UPDATE users SET matrix_access_token = $1 WHERE id = $2',

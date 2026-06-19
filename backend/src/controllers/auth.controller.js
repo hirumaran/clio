@@ -23,6 +23,12 @@ async function register(req, res) {
       return res.status(400).json({ error: 'Email, password, firstName, and lastName are required' });
     }
 
+    // Enforce a minimum password length at registration (matches reset-password),
+    // so accounts can't be created with trivially weak credentials.
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    }
+
     // Check if user already exists
     const existing = await query('SELECT id FROM users WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
@@ -47,8 +53,9 @@ async function register(req, res) {
       }
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
+    // Hash password (bcrypt cost 12 — bcrypt.compare reads the cost from each
+    // stored hash, so older cost-10 hashes keep verifying).
+    const passwordHash = await bcrypt.hash(password, 12);
 
     // Insert user
     const userResult = await query(
@@ -59,14 +66,15 @@ async function register(req, res) {
     );
     const user = userResult.rows[0];
 
-    // Enqueue Matrix provisioning — runs async, does not block registration
+    // Enqueue Matrix provisioning — runs async, does not block registration.
+    // Pass only the user id (no PII in the Redis-persisted payload); a stable
+    // jobId dedupes retries/double-submits to a single provisioning job.
     try {
-      await matrixQueue.add('provision', {
-        userId: user.id,
-        firstName,
-        lastName,
-        email,
-      });
+      await matrixQueue.add(
+        'provision',
+        { userId: user.id },
+        { jobId: `provision-${user.id}` }
+      );
     } catch (queueErr) {
       console.error('[Matrix] Failed to enqueue provisioning job:', queueErr.message);
     }
@@ -397,7 +405,7 @@ async function resetPassword(req, res) {
     }
 
     const userId = rows[0].user_id;
-    const passwordHash = await bcrypt.hash(newPassword, 10);
+    const passwordHash = await bcrypt.hash(newPassword, 12);
 
     await query(
       `UPDATE users SET password_hash = $1 WHERE id = $2`,

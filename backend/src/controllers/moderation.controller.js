@@ -117,6 +117,34 @@ async function createReport(req, res) {
       })
     }
 
+    // Relationship gate: a reporter may only reference a request/room they are a
+    // party to (borrower or item owner). Without this, anyone could file reports
+    // against arbitrary request/room IDs and pollute the moderation queue.
+    if (requestId) {
+      const { rows } = await pool.query(
+        `SELECT 1 FROM borrow_requests br
+         JOIN items i ON br.item_id = i.id
+         WHERE br.id = $1 AND (br.requester_id = $2 OR i.added_by = $2)
+         LIMIT 1`,
+        [parseInt(requestId, 10), req.user.userId]
+      )
+      if (rows.length === 0) {
+        return res.status(403).json({ error: 'You can only report a request you are part of' })
+      }
+    }
+    if (roomId) {
+      const { rows } = await pool.query(
+        `SELECT 1 FROM borrow_requests br
+         JOIN items i ON br.item_id = i.id
+         WHERE br.matrix_room_id = $1 AND (br.requester_id = $2 OR i.added_by = $2)
+         LIMIT 1`,
+        [roomId, req.user.userId]
+      )
+      if (rows.length === 0) {
+        return res.status(403).json({ error: 'You can only report a room you are part of' })
+      }
+    }
+
     const result = await pool.query(
       `INSERT INTO reports
          (reporter_id, reported_user_id, request_id, room_id, message_event_id,

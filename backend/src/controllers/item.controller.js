@@ -7,7 +7,12 @@ const { cloudinary } = require('../config/cloudinary');
  */
 async function getItems(req, res) {
   try {
-    const { school_id, category_id, q } = req.query;
+    // Coerce to scalars: duplicate query keys (?q=a&q=b) arrive as arrays, which
+    // would bind as a Postgres array and 500 the query (HTTP Parameter Pollution).
+    const pick = (v) => (Array.isArray(v) ? v[0] : v);
+    const school_id = pick(req.query.school_id);
+    const category_id = pick(req.query.category_id);
+    const q = pick(req.query.q);
 
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 20));
@@ -26,10 +31,15 @@ async function getItems(req, res) {
       params.push(category_id);
     }
     if (q) {
+      // Escape LIKE metacharacters so a user-supplied % or _ can't match-all or
+      // force expensive scans on this public endpoint (it's parameterized, so
+      // not injection — this is data-scraping/load hardening + literal-match
+      // correctness). Postgres ILIKE uses backslash as the default escape char.
+      const safeQ = String(q).replace(/[\\%_]/g, '\\$&');
       conditions.push(
         `(i.name ILIKE $${idx} OR i.description ILIKE $${idx})`
       );
-      params.push(`%${q}%`);
+      params.push(`%${safeQ}%`);
       idx++;
     }
 

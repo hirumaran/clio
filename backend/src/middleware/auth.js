@@ -1,7 +1,12 @@
 const jwt = require('jsonwebtoken');
 
-if (!process.env.JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is required');
+// Reject a missing, weak, or placeholder secret at boot. A short/known signing
+// key lets anyone forge a valid token for any { id, schoolId, role } (including
+// role:'admin'), bypassing auth and school isolation — so presence alone is not
+// enough; the value must be strong and not the shipped .env.example placeholder.
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET || JWT_SECRET.length < 32 || JWT_SECRET === 'your_jwt_secret_key_here') {
+  throw new Error('JWT_SECRET must be set to a strong (>=32 char) non-placeholder value');
 }
 
 /**

@@ -1,5 +1,7 @@
 const { pool } = require('../config/db')
 const { redactRoomEvent, shutdownRoom } = require('../utils/matrix')
+const { writeAuditBestEffort, actorFromReq } = require('../utils/audit')
+const { recordReport } = require('../utils/alerts')
 
 /**
  * Trust & safety controller — user blocks + reports (Workstream C2) and the
@@ -48,7 +50,41 @@ async function blockUser(req, res) {
       [blockerId, blockedId, reason]
     )
 
-    res.status(201).json(result.rows[0])
+    // C1 (SAFETY-GATE): a block must SEVER the existing live chat, not just
+    // prevent future pairing. Find every borrow room shared by the two parties
+    // (either as borrower/owner) and shut it down. shutdownRoom purges the room
+    // for both — appropriate for a mutual block. The DB block is recorded
+    // regardless; Matrix failures are surfaced (fail-closed), not swallowed.
+    const { rows: sharedRooms } = await pool.query(
+      `SELECT DISTINCT br.matrix_room_id
+       FROM borrow_requests br
+       JOIN items i ON br.item_id = i.id
+       WHERE br.matrix_room_id IS NOT NULL
+         AND ((br.requester_id = $1 AND i.added_by = $2)
+           OR (br.requester_id = $2 AND i.added_by = $1))`,
+      [blockerId, blockedId]
+    )
+    let roomsSevered = 0
+    const severFailures = []
+    for (const { matrix_room_id } of sharedRooms) {
+      try {
+        await shutdownRoom(matrix_room_id, { reason: 'Conversation closed by a block', actorUserId: blockerId })
+        roomsSevered++
+      } catch (err) {
+        severFailures.push(matrix_room_id)
+        console.error('[moderation.blockUser] failed to sever room', matrix_room_id, ':', err.message)
+      }
+    }
+
+    writeAuditBestEffort({
+      ...actorFromReq(req),
+      action: 'moderation.block',
+      targetType: 'user',
+      targetId: blockedId,
+      metadata: { roomsSevered, severFailures: severFailures.length },
+    })
+
+    res.status(201).json({ ...result.rows[0], roomsSevered, severFailures: severFailures.length })
   } catch (err) {
     console.error('[moderation.blockUser]', err)
     res.status(500).json({ error: 'Internal server error' })
@@ -68,6 +104,12 @@ async function unblockUser(req, res) {
       'DELETE FROM user_blocks WHERE blocker_id = $1 AND blocked_id = $2',
       [blockerId, blockedId]
     )
+    writeAuditBestEffort({
+      ...actorFromReq(req),
+      action: 'moderation.unblock',
+      targetType: 'user',
+      targetId: blockedId,
+    })
     res.status(204).end()
   } catch (err) {
     console.error('[moderation.unblockUser]', err)
@@ -162,6 +204,17 @@ async function createReport(req, res) {
         typeof evidenceText === 'string' ? evidenceText : null,
       ]
     )
+
+    const reportedId = reportedUserId ? parseInt(reportedUserId, 10) : null
+    writeAuditBestEffort({
+      ...actorFromReq(req),
+      action: 'moderation.report.create',
+      targetType: reportedId ? 'user' : roomId ? 'room' : 'borrow_request',
+      targetId: reportedId ?? roomId ?? requestId ?? null,
+      metadata: { category, reportId: result.rows[0].id },
+    })
+    // Report-volume spike against a single user (B2).
+    recordReport(reportedId)
 
     res.status(201).json(result.rows[0])
   } catch (err) {
@@ -283,7 +336,7 @@ async function actionReport(req, res) {
       if (!report.room_id) {
         return res.status(400).json({ error: 'Report has no room_id to shut down' })
       }
-      await shutdownRoom(report.room_id, { reason: 'Removed by Clio moderation' })
+      await shutdownRoom(report.room_id, { reason: 'Removed by Clio moderation', actorUserId: req.user.userId })
       newStatus = 'actioned'
     }
 
@@ -294,6 +347,19 @@ async function actionReport(req, res) {
        RETURNING id, status, action_taken, reviewed_at`,
       [newStatus, action, req.user.userId, reportId]
     )
+
+    writeAuditBestEffort({
+      ...actorFromReq(req),
+      action: `moderation.report.${action}`,
+      targetType: 'report',
+      targetId: reportId,
+      metadata: {
+        reportedUserId: report.reported_user_id,
+        roomId: report.room_id,
+        messageEventId: report.message_event_id,
+        newStatus,
+      },
+    })
 
     res.status(200).json(updated.rows[0])
   } catch (err) {

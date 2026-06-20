@@ -1,4 +1,8 @@
 const { pool } = require('../config/db')
+const { revokeAllUserTokens } = require('../utils/tokens')
+const { invalidateMatrixSessions } = require('../utils/matrix')
+const { writeAuditBestEffort, actorFromReq } = require('../utils/audit')
+const { alertCrossTenantAdmin } = require('../utils/alerts')
 
 async function getAllUsers(req, res) {
   try {
@@ -89,12 +93,13 @@ async function toggleUserStatus(req, res) {
     }
 
     const { rows: existingRows } = await pool.query(
-      'SELECT id, first_name, last_name, is_active FROM users WHERE id = $1',
+      'SELECT id, first_name, last_name, is_active, school_id, matrix_user_id FROM users WHERE id = $1',
       [targetUserId]
     )
     if (existingRows.length === 0) {
       return res.status(404).json({ error: 'User not found' })
     }
+    const existing = existingRows[0]
 
     const { rows } = await pool.query(
       `UPDATE users
@@ -103,8 +108,66 @@ async function toggleUserStatus(req, res) {
        RETURNING id, first_name, last_name, email, role, is_active, school_id`,
       [is_active, targetUserId]
     )
+    const updated = rows[0]
 
-    res.status(200).json(rows[0])
+    // Revocation on disable (C1, SAFETY-GATE): a deactivated account must lose
+    // LIVE access, not just future borrow pairing. Otherwise a removed adult
+    // keeps a working Matrix token and stays in rooms with students.
+    //   - revoke app refresh tokens (kills the ability to refresh; the current
+    //     15-min access token still works until expiry — documented window),
+    //   - invalidate ALL Matrix sessions (immediate chat cutoff) and clear the
+    //     stored token so /login and /me stop echoing a dead credential.
+    // Fail closed: if Matrix revocation fails, surface it — never report the
+    // disable as fully complete while the Matrix session is still live.
+    let matrixRevocation = 'not_applicable'
+    if (is_active === false) {
+      await revokeAllUserTokens(targetUserId).catch((err) =>
+        console.error('[admin.toggleUserStatus] revokeAllUserTokens failed:', err.message)
+      )
+
+      if (existing.matrix_user_id) {
+        try {
+          await invalidateMatrixSessions(existing.matrix_user_id, { actorUserId: req.user.userId })
+          await pool.query('UPDATE users SET matrix_access_token = NULL WHERE id = $1', [targetUserId])
+          matrixRevocation = 'revoked'
+        } catch (err) {
+          matrixRevocation = 'failed'
+          console.error('[admin.toggleUserStatus] Matrix session revocation FAILED for user', targetUserId, ':', err.message)
+          // The account is DB-disabled but its Matrix session may still be live
+          // and needs manual revocation — record it as an immutable audit row.
+          writeAuditBestEffort({
+            ...actorFromReq(req),
+            action: 'admin.user.deactivate.matrix_revocation_failed',
+            targetType: 'user',
+            targetId: targetUserId,
+            targetSchoolId: existing.school_id,
+            metadata: { matrixUserId: existing.matrix_user_id, error: err.message },
+          })
+        }
+      } else {
+        matrixRevocation = 'no_matrix_account'
+      }
+    }
+
+    writeAuditBestEffort({
+      ...actorFromReq(req),
+      action: is_active ? 'admin.user.activate' : 'admin.user.deactivate',
+      targetType: 'user',
+      targetId: targetUserId,
+      targetSchoolId: existing.school_id,
+      metadata: { matrixRevocation },
+    })
+    // Cross-tenant admin action detection (B2): a global admin acting on a user
+    // outside their own school.
+    alertCrossTenantAdmin({
+      adminUserId: req.user.userId,
+      adminSchoolId: req.user.schoolId,
+      targetSchoolId: existing.school_id,
+      action: is_active ? 'admin.user.activate' : 'admin.user.deactivate',
+      ip: req.ip,
+    })
+
+    res.status(200).json({ ...updated, matrixRevocation })
   } catch (err) {
     console.error('[admin.controller.toggleUserStatus]', err)
     res.status(500).json({ error: 'Internal server error' })

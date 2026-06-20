@@ -6,7 +6,7 @@ docker run --rm \
   -v "$(pwd)/synapse/data:/data" \
   -e SYNAPSE_SERVER_NAME=matrix.calliope.bsd405.org \
   -e SYNAPSE_REPORT_STATS=no \
-  matrixdotorg/synapse:v1.106.0 generate
+  ghcr.io/element-hq/synapse:v1.155.0 generate
 
 echo ""
 echo "Config generated at synapse/data/homeserver.yaml"

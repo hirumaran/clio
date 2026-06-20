@@ -1,0 +1,59 @@
+name: dependency-audit
+
+# Workstream F3 — surface high/critical dependency advisories on every PR and
+# weekly. Threshold is `high` so the dev-only moderate ReDoS/toolchain noise
+# (frontend tailwind chain, Expo CLI) does not drown the signal.
+#
+# NOTE: the audit steps are `continue-on-error: true` for now because the
+# backend already carries un-remediated highs that cannot be closed by a blind
+# bump (cloudinary 1.x->2.x is a major API change; multer has no patched release
+# in range — see SECURITY_ROUND2_DEBRIEF.md F1). Once that backlog is cleared in
+# a reviewed PR, REMOVE continue-on-error so the gate blocks new high/critical.
+
+on:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1' # weekly, Monday 06:00 UTC
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm audit --audit-level=high
+        continue-on-error: true
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: pnpm audit --audit-level=high
+        continue-on-error: true
+
+  mobile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm audit --audit-level=high
+        continue-on-error: true

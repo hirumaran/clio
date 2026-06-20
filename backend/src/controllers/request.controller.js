@@ -1,6 +1,7 @@
 const { pool } = require('../config/db')
 const { createNotification } = require('./notification.controller')
 const { roomQueue } = require('../queues')
+const { writeAudit, writeAuditBestEffort, actorFromReq } = require('../utils/audit')
 
 /**
  * Enqueues server-side creation of the borrow chat room (Workstream A1).
@@ -159,6 +160,15 @@ async function createRequest(req, res) {
     )
 
     res.status(201).json(insert.rows[0])
+
+    writeAuditBestEffort({
+      ...actorFromReq(req),
+      action: 'borrow.create',
+      targetType: 'borrow_request',
+      targetId: insert.rows[0].id,
+      targetSchoolId: item.owner_school_id,
+      metadata: { itemId, ownerId: item.added_by },
+    })
 
     // Fire-and-forget notification to item owner
     const actor = await pool.query(
@@ -355,6 +365,18 @@ async function approveRequest(req, res) {
       [requestId, ownerNote]
     )
 
+    // Audit the transition inside the same transaction (B1): the state change
+    // and its immutable record commit together, so a rolled-back approve never
+    // leaves a false audit row (and a failed audit rolls back the approve).
+    await writeAudit(client, {
+      ...actorFromReq(req),
+      action: 'borrow.approve',
+      targetType: 'borrow_request',
+      targetId: requestId,
+      targetSchoolId: request.requester_school_id,
+      metadata: { itemId: request.item_id, requesterId: request.requester_id },
+    })
+
     await client.query('COMMIT')
 
     res.status(200).json(updated.rows[0])
@@ -448,6 +470,15 @@ async function rejectRequest(req, res) {
 
     res.status(200).json(updated.rows[0])
 
+    writeAuditBestEffort({
+      ...actorFromReq(req),
+      action: 'borrow.reject',
+      targetType: 'borrow_request',
+      targetId: requestId,
+      targetSchoolId: request.requester_school_id,
+      metadata: { itemId: request.item_id, requesterId: request.requester_id },
+    })
+
     const actor = await pool.query(
       'SELECT first_name, last_name FROM users WHERE id = $1',
       [req.user.userId]
@@ -511,6 +542,15 @@ async function cancelRequest(req, res) {
     }
 
     res.status(200).json(updated.rows[0])
+
+    writeAuditBestEffort({
+      ...actorFromReq(req),
+      action: 'borrow.cancel',
+      targetType: 'borrow_request',
+      targetId: requestId,
+      targetSchoolId: request.owner_school_id,
+      metadata: { itemId: request.item_id },
+    })
 
     // Notify item owner
     const itemResult = await pool.query(
@@ -593,6 +633,15 @@ async function pickupItem(req, res) {
       [requestId]
     )
 
+    await writeAudit(client, {
+      ...actorFromReq(req),
+      action: 'borrow.pickup',
+      targetType: 'borrow_request',
+      targetId: requestId,
+      targetSchoolId: request.requester_school_id,
+      metadata: { itemId: request.item_id, quantity: request.quantity_requested },
+    })
+
     await client.query('COMMIT')
 
     const pickupActor = await pool.query(
@@ -673,6 +722,15 @@ async function returnItem(req, res) {
        RETURNING *`,
       [requestId]
     )
+
+    await writeAudit(client, {
+      ...actorFromReq(req),
+      action: 'borrow.return',
+      targetType: 'borrow_request',
+      targetId: requestId,
+      targetSchoolId: request.requester_school_id,
+      metadata: { itemId: request.item_id, quantity: request.quantity_requested },
+    })
 
     await client.query('COMMIT')
 

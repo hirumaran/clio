@@ -11,6 +11,17 @@ const {
   revokeAllUserTokens,
 } = require('../utils/tokens');
 const { sendPasswordResetEmail } = require('../utils/email');
+const { writeAuditBestEffort } = require('../utils/audit');
+const { recordFailedLogin, recordRegistration } = require('../utils/alerts');
+
+// Per-account login lockout (H2). Complements the IP-keyed loginLimiter: a
+// distributed attacker rotating IPs is otherwise unthrottled against a single
+// high-value (admin) account. Auto-expiring + generic response so it neither
+// leaks account existence nor permanently locks a victim out.
+const LOGIN_MAX_FAILED_ATTEMPTS = parseInt(process.env.LOGIN_MAX_FAILED_ATTEMPTS, 10) || 5;
+const LOGIN_LOCKOUT_MINUTES = parseInt(process.env.LOGIN_LOCKOUT_MINUTES, 10) || 15;
+
+const normalizeEmail = (email) => String(email).trim().toLowerCase();
 
 /**
  * POST /api/v1/auth/register
@@ -29,8 +40,12 @@ async function register(req, res) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
+    // Normalize email on write (E1b): store and match lowercase so login,
+    // forgot-password, and the UNIQUE/lower() index all resolve to one account.
+    const normalizedEmail = normalizeEmail(email);
+
     // Check if user already exists
-    const existing = await query('SELECT id FROM users WHERE email = $1', [email]);
+    const existing = await query('SELECT id FROM users WHERE lower(email) = $1', [normalizedEmail]);
     if (existing.rows.length > 0) {
       return res.status(409).json({ error: 'User already exists' });
     }
@@ -39,7 +54,7 @@ async function register(req, res) {
     // (when the school has a domain configured) the email domain must match it. The JWT tenant
     // claim must derive from a trusted, verified value — never arbitrary client input.
     if (schoolId) {
-      const emailDomain = String(email).toLowerCase().split('@')[1] || '';
+      const emailDomain = normalizedEmail.split('@')[1] || '';
       const schoolCheck = await query(
         'SELECT id, domain FROM schools WHERE id = $1 AND is_active = TRUE',
         [schoolId]
@@ -62,7 +77,7 @@ async function register(req, res) {
       `INSERT INTO users (email, password_hash, first_name, last_name, school_id)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, email, first_name, last_name, school_id, role, avatar_url, bio, created_at`,
-      [email, passwordHash, firstName, lastName, schoolId || null]
+      [normalizedEmail, passwordHash, firstName, lastName, schoolId || null]
     );
     const user = userResult.rows[0];
 
@@ -84,6 +99,20 @@ async function register(req, res) {
       user.id,
       req.headers['user-agent'] ?? null
     );
+
+    writeAuditBestEffort({
+      actorUserId: user.id,
+      actorRole: user.role,
+      actorSchoolId: user.school_id,
+      correlationId: req.id ?? null,
+      ip: req.ip ?? null,
+      action: 'auth.register',
+      targetType: 'user',
+      targetId: user.id,
+      targetSchoolId: user.school_id,
+    });
+    // Mass/automated registration abusing async Matrix provisioning (B2).
+    recordRegistration(req.ip);
 
     res.status(201).json({
       token: accessToken,
@@ -121,26 +150,91 @@ async function login(req, res) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
+    const lookupEmail = normalizeEmail(email); // E1b: case-insensitive lookup
+
     const result = await query(
       `SELECT id, email, password_hash, first_name, last_name, school_id, role, avatar_url, bio,
-              matrix_user_id, matrix_access_token, matrix_device_id
+              matrix_user_id, matrix_access_token, matrix_device_id,
+              is_active, failed_login_attempts, locked_until
        FROM users
-       WHERE email = $1`,
-      [email]
+       WHERE lower(email) = $1`,
+      [lookupEmail]
     );
+    const user = result.rows[0];
 
-    if (result.rows.length === 0) {
+    // Single generic failure path so login never reveals whether the account
+    // exists or is locked (anti-enumeration); records the signal for B1/B2.
+    const invalid = (reason, userId, schoolId) => {
+      recordFailedLogin(req.ip, lookupEmail);
+      writeAuditBestEffort({
+        actorUserId: userId ?? null,
+        actorSchoolId: schoolId ?? null,
+        correlationId: req.id ?? null,
+        ip: req.ip ?? null,
+        action: 'auth.login.failed',
+        targetType: 'email',
+        metadata: { reason },
+      });
       return res.status(401).json({ error: 'Invalid credentials' });
+    };
+
+    if (!user) {
+      return invalid('unknown_email');
     }
 
-    const user = result.rows[0];
+    // Lockout gate (H2): while locked, fail generically WITHOUT checking the
+    // password — a correct password during lockout still returns a uniform 401.
+    if (user.locked_until && new Date(user.locked_until) > new Date()) {
+      return invalid('locked', user.id, user.school_id);
+    }
+
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      // Increment the per-account failure counter; lock once it hits threshold.
+      await query(
+        `UPDATE users
+         SET failed_login_attempts = failed_login_attempts + 1,
+             locked_until = CASE
+               WHEN failed_login_attempts + 1 >= $2
+               THEN NOW() + ($3 || ' minutes')::interval
+               ELSE locked_until END
+         WHERE id = $1`,
+        [user.id, LOGIN_MAX_FAILED_ATTEMPTS, String(LOGIN_LOCKOUT_MINUTES)]
+      ).catch((err) => console.error('[Auth] login lockout update failed:', err.message));
+      return invalid('bad_password', user.id, user.school_id);
     }
 
-    // Track last login timestamp
-    await query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+    // C1: a deactivated account must not be able to log back in — re-login would
+    // otherwise mint fresh app + Matrix tokens and defeat the disable.
+    if (user.is_active === false) {
+      writeAuditBestEffort({
+        actorUserId: user.id,
+        actorSchoolId: user.school_id,
+        correlationId: req.id ?? null,
+        ip: req.ip ?? null,
+        action: 'auth.login.denied_deactivated',
+        targetType: 'user',
+        targetId: user.id,
+      });
+      return res.status(403).json({ error: 'Account deactivated' });
+    }
+
+    // Success: clear the lockout counter and stamp last_login in one write.
+    await query(
+      'UPDATE users SET last_login = NOW(), failed_login_attempts = 0, locked_until = NULL WHERE id = $1',
+      [user.id]
+    );
+
+    writeAuditBestEffort({
+      actorUserId: user.id,
+      actorRole: user.role,
+      actorSchoolId: user.school_id,
+      correlationId: req.id ?? null,
+      ip: req.ip ?? null,
+      action: 'auth.login',
+      targetType: 'user',
+      targetId: user.id,
+    });
 
     const accessToken = generateAccessToken(user.id, user.school_id, user.role);
     const refreshToken = await generateRefreshToken(
@@ -232,6 +326,12 @@ async function logout(req, res) {
       await revokeRefreshToken(rawToken).catch(() => {});
     }
 
+    writeAuditBestEffort({
+      correlationId: req.id ?? null,
+      ip: req.ip ?? null,
+      action: 'auth.logout',
+    });
+
     return res.status(200).json({ message: 'Logged out' });
   } catch (err) {
     console.error('[Auth] Logout error:', err);
@@ -307,6 +407,10 @@ async function refreshMatrix(req, res) {
     if (err.message === 'User has no Matrix account') {
       return res.status(404).json({ error: 'No Matrix account found for this user' });
     }
+    if (err.message === 'Account deactivated') {
+      // C1: a disabled user cannot mint a fresh Matrix token via the refresh path.
+      return res.status(403).json({ error: 'Account deactivated' });
+    }
 
     res.status(500).json({ error: 'Failed to refresh Matrix token' });
   }
@@ -325,8 +429,8 @@ async function forgotPassword(req, res) {
     }
 
     const { rows } = await query(
-      `SELECT id FROM users WHERE email = $1 AND is_active = TRUE`,
-      [email.toLowerCase()]
+      `SELECT id FROM users WHERE lower(email) = $1 AND is_active = TRUE`,
+      [normalizeEmail(email)]
     );
 
     if (rows.length > 0) {
@@ -421,6 +525,15 @@ async function resetPassword(req, res) {
 
     // Revoke all refresh tokens — forces re-login on all devices after reset
     await revokeAllUserTokens(userId).catch(() => {});
+
+    writeAuditBestEffort({
+      actorUserId: userId,
+      correlationId: req.id ?? null,
+      ip: req.ip ?? null,
+      action: 'auth.password_reset',
+      targetType: 'user',
+      targetId: userId,
+    });
 
     return res.status(200).json({ message: 'Password reset successfully' });
   } catch (err) {

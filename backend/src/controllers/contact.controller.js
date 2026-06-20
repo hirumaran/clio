@@ -16,6 +16,18 @@ async function submitContact(req, res) {
       return res.status(400).json({ error: 'Invalid email address' });
     }
 
+    // E2: reject CR/LF in any value that reaches an email header (subject =
+    // name+organization, reply-to = email). nodemailer v8 already collapses
+    // these, but guarding at the boundary means header safety doesn't silently
+    // depend on a transitive dependency's behavior surviving a future bump.
+    if ([name, organization, role].some((v) => /[\r\n]/.test(String(v)))) {
+      return res.status(400).json({ error: 'Invalid characters in submission' });
+    }
+    // Cap lengths to bound abuse / email size.
+    if (name.length > 200 || organization.length > 200 || role.length > 100 || message.length > 5000) {
+      return res.status(400).json({ error: 'A field exceeds the maximum allowed length' });
+    }
+
     const result = await sendContactSubmissionEmail({
       name,
       email,

@@ -9,6 +9,8 @@
 
 const crypto = require('crypto');
 const { query } = require('../config/db');
+const { writeAuditBestEffort } = require('./audit');
+const { checkMatrixAdminSource } = require('./alerts');
 
 const HOMESERVER_URL = process.env.MATRIX_HOMESERVER_URL;
 const SHARED_SECRET  = process.env.MATRIX_SHARED_SECRET;
@@ -185,7 +187,11 @@ function localpartOf(matrixUserId) {
  * Synapse admin endpoint (>= 1.64.0):
  *   POST /_synapse/admin/v1/users/<localpart>/login
  */
-async function adminLoginAsUser(localpart, ttlMs = 5 * 60 * 1000) {
+async function adminLoginAsUser(localpart, opts = {}) {
+  // Backward-compatible: legacy callers pass ttlMs as a number positional arg.
+  const { ttlMs = 5 * 60 * 1000, auditSource, actorUserId } =
+    typeof opts === 'number' ? { ttlMs: opts } : opts;
+
   if (!HOMESERVER_URL) {
     throw new Error('MATRIX_HOMESERVER_URL is not configured');
   }
@@ -218,20 +224,39 @@ async function adminLoginAsUser(localpart, ttlMs = 5 * 60 * 1000) {
   }
 
   const data = await loginRes.json();
+
+  // Audit every admin-token mint (B1) — the highest-privilege primitive on the
+  // server. Identifiers + source only, never the minted token. Alert if a caller
+  // mints outside a recognized flow (B2 tripwire).
+  writeAuditBestEffort({
+    actorUserId,
+    action: 'matrix.admin_login',
+    targetType: 'matrix_user',
+    targetId: localpart,
+    metadata: { source: auditSource ?? 'unspecified', ttlMs },
+  });
+  checkMatrixAdminSource(auditSource, { localpart, actorUserId });
+
   return data.access_token;
 }
 
 /**
  * Regenerates a Matrix access token for a user via the Synapse admin API and
  * persists it. Used to recover a user whose stored token expired.
+ *
+ * Refuses for a deactivated account (C1): a disabled user must not be able to
+ * mint a fresh Matrix token via the refresh path.
  */
 async function regenerateMatrixToken(dbUserId) {
   const result = await query(
-    'SELECT matrix_user_id, matrix_device_id FROM users WHERE id = $1',
+    'SELECT matrix_user_id, matrix_device_id, is_active FROM users WHERE id = $1',
     [dbUserId]
   );
   if (result.rows.length === 0 || !result.rows[0].matrix_user_id) {
     throw new Error('User has no Matrix account');
+  }
+  if (result.rows[0].is_active === false) {
+    throw new Error('Account deactivated');
   }
 
   const matrixUserId = result.rows[0].matrix_user_id;
@@ -239,7 +264,11 @@ async function regenerateMatrixToken(dbUserId) {
 
   // ~1h: the frontend consumes this for an active chat session and can re-call
   // /auth/matrix/refresh to renew, so it need not be long-lived.
-  const accessToken = await adminLoginAsUser(localpartOf(matrixUserId), 60 * 60 * 1000);
+  const accessToken = await adminLoginAsUser(localpartOf(matrixUserId), {
+    ttlMs: 60 * 60 * 1000,
+    auditSource: 'session_refresh',
+    actorUserId: dbUserId,
+  });
 
   await query(
     'UPDATE users SET matrix_access_token = $1 WHERE id = $2',
@@ -271,7 +300,9 @@ async function createBorrowRoom({ ownerMatrixUserId, borrowerMatrixUserId, name,
     throw new Error('createBorrowRoom requires both owner and borrower Matrix user IDs');
   }
 
-  const ownerToken = await adminLoginAsUser(localpartOf(ownerMatrixUserId));
+  const ownerToken = await adminLoginAsUser(localpartOf(ownerMatrixUserId), {
+    auditSource: 'create_borrow_room',
+  });
 
   const createRes = await fetch(
     `${HOMESERVER_URL}/_matrix/client/v3/createRoom`,
@@ -317,7 +348,9 @@ async function redactRoomEvent({ roomId, eventId, actorMatrixUserId, reason }) {
     throw new Error('redactRoomEvent requires roomId, eventId and actorMatrixUserId');
   }
 
-  const token = await adminLoginAsUser(localpartOf(actorMatrixUserId));
+  const token = await adminLoginAsUser(localpartOf(actorMatrixUserId), {
+    auditSource: 'redact_message',
+  });
   const txnId = `clio_redact_${eventId}`;
 
   const res = await fetch(
@@ -348,7 +381,7 @@ async function redactRoomEvent({ roomId, eventId, actorMatrixUserId, reason }) {
  * Synapse admin endpoint:
  *   POST /_synapse/admin/v1/rooms/<room_id>/delete
  */
-async function shutdownRoom(roomId, { reason } = {}) {
+async function shutdownRoom(roomId, { reason, actorUserId } = {}) {
   if (!HOMESERVER_URL) {
     throw new Error('MATRIX_HOMESERVER_URL is not configured');
   }
@@ -378,6 +411,113 @@ async function shutdownRoom(roomId, { reason } = {}) {
     throw new Error(`Matrix room shutdown failed: ${res.status} ${err.error || ''}`);
   }
 
+  writeAuditBestEffort({
+    actorUserId: actorUserId ?? null,
+    action: 'matrix.room_delete',
+    targetType: 'room',
+    targetId: roomId,
+    metadata: { reason: reason || null },
+  });
+
+  return await res.json().catch(() => ({}));
+}
+
+/**
+ * Invalidates ALL of a user's Matrix access tokens by deleting their devices
+ * via the Synapse admin API (Workstream C1). This logs the user out everywhere
+ * without erasing the account, so a re-enabled user can mint a fresh token via
+ * regenerateMatrixToken. The safety-critical cutoff for a blocked/deactivated
+ * user: with no valid token they cannot read or post in ANY room.
+ *
+ *   GET  /_synapse/admin/v2/users/<user_id>/devices
+ *   POST /_synapse/admin/v2/users/<user_id>/delete_devices  { devices: [...] }
+ */
+async function invalidateMatrixSessions(matrixUserId, { auditSource = 'revoke_sessions', actorUserId } = {}) {
+  if (!HOMESERVER_URL) {
+    throw new Error('MATRIX_HOMESERVER_URL is not configured');
+  }
+  const adminToken = process.env.MATRIX_ADMIN_TOKEN;
+  if (!adminToken) {
+    throw new Error('MATRIX_ADMIN_TOKEN is not configured');
+  }
+  if (!matrixUserId) {
+    throw new Error('invalidateMatrixSessions requires a matrixUserId');
+  }
+
+  const authHeader = { Authorization: `Bearer ${adminToken}` };
+  const base = `${HOMESERVER_URL}/_synapse/admin/v2/users/${encodeURIComponent(matrixUserId)}`;
+
+  const listRes = await fetch(`${base}/devices`, { headers: authHeader });
+  if (!listRes.ok) {
+    const err = await listRes.json().catch(() => ({}));
+    throw new Error(`Synapse list devices failed for ${matrixUserId}: ${listRes.status} ${err.error || ''}`);
+  }
+  const { devices = [] } = await listRes.json();
+  const deviceIds = devices.map((d) => d.device_id).filter(Boolean);
+
+  if (deviceIds.length > 0) {
+    const delRes = await fetch(`${base}/delete_devices`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeader },
+      body: JSON.stringify({ devices: deviceIds }),
+    });
+    if (!delRes.ok) {
+      const err = await delRes.json().catch(() => ({}));
+      throw new Error(`Synapse delete_devices failed for ${matrixUserId}: ${delRes.status} ${err.error || ''}`);
+    }
+  }
+
+  writeAuditBestEffort({
+    actorUserId: actorUserId ?? null,
+    action: 'matrix.sessions_invalidated',
+    targetType: 'matrix_user',
+    targetId: matrixUserId,
+    metadata: { source: auditSource, deviceCount: deviceIds.length },
+  });
+
+  return { invalidatedDevices: deviceIds.length };
+}
+
+/**
+ * Permanently deactivates a Matrix account via the Synapse admin API
+ * (Workstream C1/C2 deprovision). Invalidates all tokens, removes the account
+ * from all rooms, and (with erase) scrubs profile data. NOT reversible — use
+ * invalidateMatrixSessions for a temporary disable. Intended for end-of-year /
+ * account-deletion deprovisioning, not the reversible admin toggle.
+ *
+ *   POST /_synapse/admin/v1/deactivate/<user_id>  { erase }
+ */
+async function deactivateMatrixUser(matrixUserId, { erase = false, actorUserId } = {}) {
+  if (!HOMESERVER_URL) {
+    throw new Error('MATRIX_HOMESERVER_URL is not configured');
+  }
+  const adminToken = process.env.MATRIX_ADMIN_TOKEN;
+  if (!adminToken) {
+    throw new Error('MATRIX_ADMIN_TOKEN is not configured');
+  }
+
+  const res = await fetch(
+    `${HOMESERVER_URL}/_synapse/admin/v1/deactivate/${encodeURIComponent(matrixUserId)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+      body: JSON.stringify({ erase }),
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Synapse deactivate failed for ${matrixUserId}: ${res.status} ${err.error || ''}`);
+  }
+
+  writeAuditBestEffort({
+    actorUserId: actorUserId ?? null,
+    action: 'matrix.account_deactivated',
+    targetType: 'matrix_user',
+    targetId: matrixUserId,
+    metadata: { erase },
+  });
+
   return await res.json().catch(() => ({}));
 }
 
@@ -391,4 +531,6 @@ module.exports = {
   createBorrowRoom,
   redactRoomEvent,
   shutdownRoom,
+  invalidateMatrixSessions,
+  deactivateMatrixUser,
 };

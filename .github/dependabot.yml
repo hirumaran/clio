@@ -1,0 +1,32 @@
+# Dependency update automation (Workstream F3).
+# Covers the three real packages plus the Synapse image and the workflows here.
+# pnpm lockfiles are handled under the "npm" ecosystem.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "backend"]
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "frontend"]
+  - package-ecosystem: "npm"
+    directory: "/mobile"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "mobile"]
+  - package-ecosystem: "docker"
+    directory: "/synapse"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "synapse"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -46,12 +46,19 @@ CREATE TABLE users (
   matrix_user_id       TEXT UNIQUE,
   matrix_access_token  TEXT,
   matrix_device_id     TEXT,
-  matrix_password_hash TEXT
+  matrix_password_hash TEXT,
+  -- Per-account login lockout (H2, migration 027)
+  failed_login_attempts INTEGER NOT NULL DEFAULT 0,
+  locked_until          TIMESTAMPTZ
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_matrix_id      ON users(matrix_user_id);
 CREATE INDEX IF NOT EXISTS idx_users_school_id       ON users(school_id);
 CREATE INDEX IF NOT EXISTS idx_users_school_active   ON users(school_id, is_active);
+-- Case-insensitive email uniqueness (E1b, migration 026): emails are normalized
+-- to lowercase on write, and this enforces one account per address regardless
+-- of casing.
+CREATE UNIQUE INDEX IF NOT EXISTS users_email_lower_uniq ON users (lower(email));
 
 -- Categories
 CREATE TABLE categories (

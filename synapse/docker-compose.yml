@@ -2,10 +2,15 @@ version: '3.8'
 
 services:
   synapse:
-    # Pinned (no :latest) so the deployed version is deterministic. v1.106.0 is
-    # the floor that fixes CVE-2024-37302/37303; BUMP to the current stable
-    # release on a tracked cadence: https://github.com/element-hq/synapse/releases
-    image: matrixdotorg/synapse:v1.106.0
+    # Maintained image: Synapse moved off the now-ARCHIVED matrixdotorg/synapse
+    # line to Element's ghcr.io/element-hq/synapse (AGPLv3 — see deploy runbook A1
+    # for the licensing implication). Pinned (no :latest) for deterministic
+    # deploys; bump on a tracked cadence:
+    #   https://github.com/element-hq/synapse/releases
+    # NOTE: this repin closes a ~2-year gap from v1.106.0 and is NOT a safe
+    # blind bump — run a Synapse config dry-run and read the intervening upgrade
+    # notes (deprecated/renamed keys, DB migrations) BEFORE deploying. See A1.
+    image: ghcr.io/element-hq/synapse:v1.155.0
     container_name: calliope-synapse
     restart: unless-stopped
     environment:

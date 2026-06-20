@@ -5,22 +5,22 @@ import { SchoolDot } from "./landing-ui"
 const FEATURE = {
   quote:
     "We found out the middle school across town had the exact Edwardian set dressing we were about to spend our whole budget rebuilding. Clio paid for itself before our first production even opened.",
-  name: "Dana Whitfield",
-  role: "Theatre Director · Lincoln High School",
+  name: "Brian Nyguen",
+  role: "Art Coordinator · Bellevue Big Picture",
 }
 
 const SUPPORTING = [
   {
     quote:
       "Cataloguing felt like a chore until I realized I'd never lose track of a costume again. Now I plan a season around what I can actually borrow.",
-    name: "Marcus Lee",
-    role: "Drama Teacher · Roosevelt Middle",
+    name: "Hiiro Kawamura-Ayers",
+    role: "Drama Student · Bellevue Big Picture",
   },
   {
     quote:
       "For the first time I can show the board exactly what our arts programs share — and what they save. It made our funding conversation easy.",
-    name: "Priya Nandakumar",
-    role: "Arts Coordinator · Mapleton District",
+    name: "Tiirumiisu",
+    role: "True work of Art · Bellevue Big Picture",
   },
 ]
 

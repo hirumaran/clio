@@ -362,7 +362,7 @@
 
   --text-primary: #14130f;
   --text-secondary: #46443c;   /* body copy — warm charcoal, strong contrast */
-  --text-muted: #8a857a;       /* labels / captions — warm pebble */
+  --text-muted: #6a6458;       /* labels / captions — warm pebble (>=5:1 on light surfaces) */
 
   --bg-base: #faf6ef;
   --bg-raised: #ffffff;        /* elevated card surface */
@@ -373,6 +373,30 @@
   --border-default: #e7e0d2;   /* warm hairline */
   --border-subtle: #efe9dd;
   --border-strong: #d8cfbd;
+
+  /* ── Semantic layer ──
+     Category tints, status colors, on-ember-wash ink, and the card hover
+     scrim. Components MUST route through these instead of baking light hex,
+     so every accent inverts via the .dark .landing-root counterparts below. */
+  --cat-costumes: #efe4d6;
+  --cat-props: #fbe6df;
+  --cat-scripts: #e8e8e2;
+  --cat-sets: #e2e7e1;
+  --cat-lighting: #f4ecd4;
+  --cat-sound: #e5e5eb;
+
+  --status-ok-bg: #e9f3ec;
+  --status-ok-fg: #256b40;       /* darkened for AA on the light ok chip */
+  --status-ok-border: #cbe6d3;
+  --status-warn-bg: #f6ecd6;
+  --status-warn-fg: #7d5210;     /* darkened for AA on the light warn chip */
+  --status-warn-border: #e9d7b3;
+
+  --ember-on-wash: #b23a26;      /* readable ember ink on --ember-wash */
+  --ember-wash-border: #f6cabd;
+
+  --card-hover-scrim-strong: rgba(20, 18, 13, 0.18);
+  --card-hover-scrim-soft: rgba(20, 18, 13, 0.04);
 
   font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
@@ -432,6 +456,20 @@
     0 1px 2px rgba(20, 19, 15, 0.04),
     0 14px 30px -18px rgba(20, 19, 15, 0.20),
     0 40px 80px -40px rgba(20, 19, 15, 0.18);
+}
+
+/* Flat structural panel — same surface + hairline as the float card, but only
+   the contact shadow. For panels that sit ON the page (catalogue browser,
+   audience visuals, analytics bento, testimonials) rather than float above it,
+   so the heavy two-layer lift is reserved for genuinely floating objects. */
+.landing-flat-card {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(20, 19, 15, 0.05);
+}
+.dark .landing-flat-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 /* Infinite, hover-pausable marquee track. */
@@ -504,6 +542,27 @@
   --border-default: #322d24;   /* warm hairline on dark */
   --border-subtle: #26221b;
   --border-strong: #443d30;
+
+  /* ── Semantic layer — dark counterparts (mirror the light set above) ── */
+  --cat-costumes: #2a241c;
+  --cat-props: #2e211c;
+  --cat-scripts: #232320;
+  --cat-sets: #20251f;
+  --cat-lighting: #2b2718;
+  --cat-sound: #222226;
+
+  --status-ok-bg: rgba(58, 156, 99, 0.16);
+  --status-ok-fg: #6fce95;
+  --status-ok-border: rgba(58, 156, 99, 0.3);
+  --status-warn-bg: rgba(196, 150, 60, 0.16);
+  --status-warn-fg: #e2b260;
+  --status-warn-border: rgba(196, 150, 60, 0.3);
+
+  --ember-on-wash: #ff9b86;
+  --ember-wash-border: rgba(255, 106, 77, 0.3);
+
+  --card-hover-scrim-strong: rgba(255, 106, 77, 0.14);
+  --card-hover-scrim-soft: rgba(255, 106, 77, 0.04);
 }
 
 /* Frosted nav pill — warm-dark glass in dark mode. */
@@ -539,8 +598,7 @@
   .landing-root *,
   .landing-root *::before,
   .landing-root *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
+    animation: none !important;
     transition-duration: 0.001ms !important;
   }
 }

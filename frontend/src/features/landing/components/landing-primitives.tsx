@@ -3,6 +3,8 @@ import { Link } from "react-router-dom"
 import { motion, type HTMLMotionProps } from "framer-motion"
 import { cn } from "@/lib/utils"
 
+const MotionLink = motion(Link)
+
 /* ──────────────────────────────────────────────────────────────
    Container — 1440 max-width content rail with responsive gutters.
    ────────────────────────────────────────────────────────────── */
@@ -64,13 +66,13 @@ export function Eyebrow({
 type ButtonVariant = "primary" | "secondary" | "ember" | "ghost"
 
 const baseBtn =
-  "group inline-flex items-center justify-center gap-2 rounded-full text-[15px] font-medium tracking-[-0.01em] px-6 py-3 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--ember)] focus-visible:ring-offset-[var(--background)] disabled:opacity-50"
+  "group inline-flex items-center justify-center gap-2 rounded-full text-[15px] font-medium tracking-[-0.01em] px-6 py-3 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--foreground)] focus-visible:ring-offset-[var(--background)] disabled:opacity-50"
 
 const variantBtn: Record<ButtonVariant, string> = {
   primary: "bg-[var(--foreground)] text-[var(--primary-foreground)] hover:bg-[var(--primary-hover,#000)]",
   secondary:
     "bg-transparent text-[var(--text-primary)] border border-[var(--border-strong)] hover:border-[var(--foreground)] hover:bg-[var(--bg-subtle)]",
-  ember: "bg-[var(--ember)] text-white hover:brightness-[0.94]",
+  ember: "bg-[var(--ember)] text-[var(--stage)] hover:brightness-[0.94]",
   ghost: "px-0 py-0 text-[var(--text-primary)] hover:text-[var(--ember)] rounded-none",
 }
 
@@ -83,22 +85,22 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = "primary", to, children, className = "", ...props }, ref) => {
     const classes = cn(baseBtn, variantBtn[variant], className)
+    const motionProps = {
+      whileHover: { y: -1 },
+      whileTap: { y: 0 },
+      transition: { duration: 0.18 },
+    }
     if (to) {
+      // Forward props (e.g. onClick to close the mobile menu) and give the link
+      // the same tactile lift as the <button> variant.
       return (
-        <Link to={to} className={classes}>
+        <MotionLink to={to} className={classes} {...motionProps} {...(props as object)}>
           {children}
-        </Link>
+        </MotionLink>
       )
     }
     return (
-      <motion.button
-        ref={ref}
-        whileHover={{ y: -1 }}
-        whileTap={{ y: 0 }}
-        transition={{ duration: 0.18 }}
-        className={classes}
-        {...props}
-      >
+      <motion.button ref={ref} className={classes} {...motionProps} {...props}>
         {children}
       </motion.button>
     )
@@ -120,8 +122,8 @@ export function Tag({
 }) {
   const tones = {
     neutral: "bg-[var(--bg-subtle)] text-[var(--text-secondary)] border-[var(--border-default)]",
-    ember: "bg-[var(--ember-wash)] text-[#b23a26] border-[#f6cabd]",
-    available: "bg-[#e9f3ec] text-[#2f7d4f] border-[#cbe6d3]",
+    ember: "bg-[var(--ember-wash)] text-[var(--ember-on-wash)] border-[var(--ember-wash-border)]",
+    available: "bg-[var(--status-ok-bg)] text-[var(--status-ok-fg)] border-[var(--status-ok-border)]",
   }
   return (
     <span

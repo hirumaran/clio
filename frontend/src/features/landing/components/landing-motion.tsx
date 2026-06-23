@@ -152,10 +152,13 @@ function formatNumber(n: number, decimals: number, hasComma: boolean) {
 export function Marquee({
   children,
   speed = 40,
+  reverse = false,
   className = "",
 }: {
   children: ReactNode
   speed?: number
+  /** Scroll right-to-left by default; set true to run the track the other way. */
+  reverse?: boolean
   className?: string
 }) {
   const reduce = useReducedMotion()
@@ -168,12 +171,20 @@ export function Marquee({
   }
   return (
     <div className={`marquee group relative overflow-hidden ${className}`}>
+      {/* Two identical copies, each carrying its own trailing gap (pr-*), so the
+          -50% scroll lands copy two exactly where copy one began — seamless, with
+          no half-gap jump at the seam. The duplicate is aria-hidden to stay out of
+          the reading order and to avoid colliding keys with the first copy. */}
       <div
-        className="marquee__track flex w-max items-center gap-x-16 md:gap-x-24"
-        style={{ animationDuration: `${speed}s` }}
+        className="marquee__track flex w-max"
+        style={{ animationDuration: `${speed}s`, animationDirection: reverse ? "reverse" : undefined }}
       >
-        {children}
-        {children}
+        <div className="flex shrink-0 items-center gap-x-16 pr-16 md:gap-x-24 md:pr-24">
+          {children}
+        </div>
+        <div aria-hidden className="flex shrink-0 items-center gap-x-16 pr-16 md:gap-x-24 md:pr-24">
+          {children}
+        </div>
       </div>
     </div>
   )
@@ -275,20 +286,33 @@ export function StaggerItem({
    ────────────────────────────────────────────────────────────── */
 export function useScrollSpy(ids: string[], offset = 120) {
   const [active, setActive] = useState<string | null>(null)
+  // Callers pass a fresh array each render (ids.map(...)); a joined string keeps
+  // the effect from re-subscribing the scroll listener on every render.
+  const key = ids.join("|")
   useEffect(() => {
-    const handler = () => {
+    const list = key ? key.split("|") : []
+    let raf = 0
+    const compute = () => {
+      raf = 0
       let current: string | null = null
-      for (const id of ids) {
+      for (const id of list) {
         const el = document.getElementById(id)
         if (!el) continue
-        const top = el.getBoundingClientRect().top
-        if (top - offset <= 0) current = id
+        if (el.getBoundingClientRect().top - offset <= 0) current = id
       }
       setActive(current)
     }
-    handler()
-    window.addEventListener("scroll", handler, { passive: true })
-    return () => window.removeEventListener("scroll", handler)
-  }, [ids, offset])
+    // rAF-throttle so layout is read at most once per frame instead of on every
+    // (potentially sub-frame) passive scroll event.
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(compute)
+    }
+    compute()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      if (raf) cancelAnimationFrame(raf)
+    }
+  }, [key, offset])
   return active
 }

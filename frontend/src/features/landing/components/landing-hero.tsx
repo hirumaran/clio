@@ -29,7 +29,7 @@ const HERO_CARDS: { resource: Resource; style: string; float: number; delay: num
       status: "Available",
     },
     style: "left-0 top-6 w-[210px]",
-    float: 10,
+    float: 7,
     delay: 0,
   },
   {
@@ -41,7 +41,7 @@ const HERO_CARDS: { resource: Resource; style: string; float: number; delay: num
       status: "Reserved",
     },
     style: "right-2 top-0 w-[212px]",
-    float: 13,
+    float: 7,
     delay: 0.6,
   },
   {
@@ -53,7 +53,7 @@ const HERO_CARDS: { resource: Resource; style: string; float: number; delay: num
       status: "Available",
     },
     style: "right-10 bottom-2 w-[204px]",
-    float: 9,
+    float: 7,
     delay: 1.1,
   },
 ]
@@ -78,10 +78,10 @@ export function LandingHero() {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: EASE }}
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--bg-raised)] px-3 py-1.5 text-[12.5px] font-medium tracking-[-0.01em] text-[var(--text-secondary)]"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--bg-raised)] px-3 py-1.5 text-[12px] font-medium tracking-[-0.01em] text-[var(--text-secondary)]"
             >
               <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--ember)" }} />
-              The resource network for K-12 theatre
+              A resource network for K-12 theatre
             </motion.span>
 
             <motion.h1
@@ -133,7 +133,7 @@ export function LandingHero() {
               transition={{ duration: 0.7, ease: EASE, delay: 0.24 }}
               className="mt-9 flex flex-wrap items-center gap-3"
             >
-              <Button to="/signup" className="px-7 py-3.5 text-[15px]">
+              <Button to="/signup" variant="ember" className="px-7 py-3.5 text-[15px]">
                 Get started free
                 <ArrowRight size={17} strokeWidth={2} className="transition-transform group-hover:translate-x-0.5" />
               </Button>
@@ -148,7 +148,7 @@ export function LandingHero() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="mt-6 text-[13px] tracking-[-0.01em] text-[var(--text-muted)]"
             >
-              Built for drama teachers · No setup fees · District-ready in a day
+              Built for drama teachers · No setup fees · No contracts
             </motion.p>
           </div>
 
@@ -190,7 +190,7 @@ export function LandingHero() {
                   <div className="text-[13px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
                     Mapleton District
                   </div>
-                  <div className="text-[11px] text-[var(--text-muted)]">12 schools connected</div>
+                  <div className="text-[11px] text-[var(--text-muted)]">4 schools connected</div>
                 </div>
               </div>
             </Float>

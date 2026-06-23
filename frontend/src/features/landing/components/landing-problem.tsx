@@ -60,14 +60,14 @@ export function LandingProblem() {
           {/* "In the dark" panel */}
           <Reveal delay={0.1}>
             <div
-              className="relative overflow-hidden rounded-[24px] p-7 sm:p-9"
+              className="relative overflow-hidden rounded-[24px] p-7 sm:p-9 dark:border dark:border-[var(--border-subtle)]"
               style={{ background: "var(--stage)" }}
             >
               <div className="flex items-center justify-between">
-                <span className="lp-eyebrow" style={{ color: "rgba(250,246,239,0.5)" }}>
+                <span className="lp-eyebrow" style={{ color: "rgba(250,246,239,0.6)" }}>
                   Storage room · Lincoln High
                 </span>
-                <span className="flex items-center gap-1.5 text-[11px] text-[rgba(250,246,239,0.45)]">
+                <span className="flex items-center gap-1.5 text-[11px] text-[rgba(250,246,239,0.6)]">
                   <Lock size={12} strokeWidth={1.6} /> Invisible to the district
                 </span>
               </div>
@@ -88,7 +88,7 @@ export function LandingProblem() {
                       <div className="mt-6 text-[13px] font-medium text-[rgba(250,246,239,0.7)]">
                         {item.label}
                       </div>
-                      <div className="mt-0.5 text-[11px] text-[rgba(250,246,239,0.35)]">
+                      <div className="mt-0.5 text-[11px] text-[rgba(250,246,239,0.62)]">
                         {item.note}
                       </div>
                     </motion.div>
@@ -96,7 +96,7 @@ export function LandingProblem() {
                 })}
               </div>
 
-              <div className="mt-6 flex items-center gap-2 text-[12.5px] text-[rgba(250,246,239,0.4)]">
+              <div className="mt-6 flex items-center gap-2 text-[12px] text-[rgba(250,246,239,0.55)]">
                 <span className="h-px flex-1 bg-[rgba(250,246,239,0.12)]" />
                 Dust, not data
                 <span className="h-px flex-1 bg-[rgba(250,246,239,0.12)]" />

@@ -13,9 +13,9 @@ function Bullets({ items }: { items: string[] }) {
             className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full"
             style={{ background: "var(--ember-wash)" }}
           >
-            <Check size={13} strokeWidth={2.4} style={{ color: "#b23a26" }} />
+            <Check size={13} strokeWidth={2.4} style={{ color: "var(--ember-on-wash)" }} />
           </span>
-          <span className="text-[15.5px] leading-[1.5] text-[var(--text-secondary)]">{it}</span>
+          <span className="text-[15px] leading-[1.5] text-[var(--text-secondary)]">{it}</span>
         </StaggerItem>
       ))}
     </Stagger>
@@ -25,29 +25,29 @@ function Bullets({ items }: { items: string[] }) {
 /* ── Teachers: coordination thread visual ── */
 function TeacherVisual() {
   return (
-    <div className="landing-float-card p-5 sm:p-6">
+    <div className="landing-flat-card p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <span className="lp-eyebrow">Borrow request</span>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e9f3ec] px-2.5 py-1 text-[11px] font-medium text-[#2f7d4f]">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--status-ok-border)] bg-[var(--status-ok-bg)] px-2.5 py-1 text-[11px] font-medium text-[var(--status-ok-fg)]">
           <CheckCircle2 size={12} strokeWidth={2} /> Approved
         </span>
       </div>
-      <h4 className="mt-3 text-[18px] font-semibold tracking-[-0.025em] text-[var(--text-primary)]">
+      <h3 className="mt-3 text-[18px] font-semibold tracking-[-0.025em] text-[var(--text-primary)]">
         Victorian Frock Coat
-      </h4>
+      </h3>
       <p className="text-[13px] text-[var(--text-muted)]">Lincoln High → Jefferson High</p>
 
       <div className="mt-5 space-y-3">
         <div className="flex items-start gap-2.5">
           <SchoolDot name="Jefferson High" size={26} />
-          <div className="rounded-2xl rounded-tl-md bg-[var(--bg-subtle)] px-3.5 py-2.5 text-[13.5px] leading-snug text-[var(--text-secondary)]">
+          <div className="rounded-2xl rounded-tl-md bg-[var(--bg-subtle)] px-3.5 py-2.5 text-[13px] leading-snug text-[var(--text-secondary)]">
             Could we borrow this for our spring run, Mar 12–24?
           </div>
         </div>
         <div className="flex flex-row-reverse items-start gap-2.5">
           <SchoolDot name="Lincoln High" size={26} />
           <div
-            className="rounded-2xl rounded-tr-md px-3.5 py-2.5 text-[13.5px] leading-snug text-[var(--primary-foreground)]"
+            className="rounded-2xl rounded-tr-md px-3.5 py-2.5 text-[13px] leading-snug text-[var(--primary-foreground)]"
             style={{ background: "var(--foreground)" }}
           >
             Of course — it's yours. Pickup at the costume shop?
@@ -58,7 +58,7 @@ function TeacherVisual() {
       <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] px-4 py-3">
         <Calendar size={18} strokeWidth={1.7} style={{ color: "var(--ember)" }} />
         <div className="leading-tight">
-          <div className="text-[13.5px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+          <div className="text-[13px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
             Handoff scheduled
           </div>
           <div className="text-[12px] text-[var(--text-muted)]">Friday · 3:30 PM · Returns Mar 26</div>
@@ -78,13 +78,13 @@ const SCHOOLS = [
 
 function DistrictVisual() {
   return (
-    <div className="landing-float-card p-5 sm:p-6">
+    <div className="landing-flat-card p-5 sm:p-6">
       <div className="flex items-center justify-between">
         <div>
           <span className="lp-eyebrow">District overview</span>
-          <h4 className="mt-2 text-[18px] font-semibold tracking-[-0.025em] text-[var(--text-primary)]">
+          <h3 className="mt-2 text-[18px] font-semibold tracking-[-0.025em] text-[var(--text-primary)]">
             Mapleton District
-          </h4>
+          </h3>
         </div>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-default)] px-2.5 py-1 text-[11px] font-medium text-[var(--text-secondary)]">
           <ShieldCheck size={12} strokeWidth={1.8} /> Admin
@@ -97,7 +97,7 @@ function DistrictVisual() {
             <SchoolDot name={s.name} size={28} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">
-                <span className="truncate text-[13.5px] font-medium tracking-[-0.01em] text-[var(--text-primary)]">
+                <span className="truncate text-[13px] font-medium tracking-[-0.01em] text-[var(--text-primary)]">
                   {s.name}
                 </span>
                 <span className="lp-tnum text-[12px] text-[var(--text-muted)]">{s.items} items</span>
@@ -118,7 +118,7 @@ function DistrictVisual() {
       </div>
 
       <div className="mt-5 flex items-center justify-between rounded-2xl border border-[var(--border-default)] bg-[var(--bg-subtle)] px-4 py-3">
-        <span className="text-[12.5px] text-[var(--text-muted)]">District utilization</span>
+        <span className="text-[12px] text-[var(--text-muted)]">District utilization</span>
         <span className="lp-tnum text-[20px] font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
           +43%
         </span>
@@ -149,7 +149,7 @@ export function LandingAudiences() {
                 </h2>
               </Reveal>
               <Reveal delay={0.1}>
-                <p className="mt-5 text-[16.5px] leading-[1.65] text-[var(--text-secondary)]">
+                <p className="mt-5 text-[16px] leading-[1.65] text-[var(--text-secondary)]">
                   Clio gives you the whole district's inventory at your fingertips, and a
                   calm way to borrow what you need — without the group-text chaos.
                 </p>
@@ -186,7 +186,7 @@ export function LandingAudiences() {
                 </h2>
               </Reveal>
               <Reveal delay={0.1}>
-                <p className="mt-5 text-[16.5px] leading-[1.65] text-[var(--text-secondary)]">
+                <p className="mt-5 text-[16px] leading-[1.65] text-[var(--text-secondary)]">
                   Give every arts program a shared backbone — with the oversight, control,
                   and reporting that justifies the budget at the next board meeting.
                 </p>

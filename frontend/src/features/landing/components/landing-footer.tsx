@@ -40,18 +40,18 @@ export function LandingFooter() {
           <div className="max-w-xs">
             <Wordmark />
             <p className="mt-4 text-[14px] leading-[1.6] text-[var(--text-muted)]">
-              The resource network for K-12 theatre. Turning scattered storage rooms into a
+              A resource network for K-12 theatre. Turning scattered storage rooms into a
               connected, collaborative stage.
             </p>
           </div>
           {COLUMNS.map((col) => (
             <div key={col.title}>
-              <h4 className="lp-eyebrow">{col.title}</h4>
+              <h2 className="lp-eyebrow">{col.title}</h2>
               <ul className="mt-4 space-y-3">
                 {col.links.map((l) => {
                   const isAnchor = l.href.startsWith("#")
                   const cls =
-                    "text-[14.5px] tracking-[-0.01em] text-[var(--text-secondary)] transition-colors hover:text-[var(--ember)]"
+                    "text-[14px] tracking-[-0.01em] text-[var(--text-secondary)] transition-colors hover:text-[var(--ember)]"
                   return (
                     <li key={l.label}>
                       {isAnchor ? (

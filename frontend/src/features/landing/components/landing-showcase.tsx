@@ -62,13 +62,13 @@ export function LandingShowcase() {
 
         {/* ── Crafted product UI: the district catalogue ── */}
         <Reveal delay={0.1}>
-          <div className="landing-float-card mt-12 overflow-hidden p-0">
-            {/* window chrome */}
-            <div className="flex items-center gap-3 border-b border-[var(--border-default)] px-4 py-3 sm:px-5">
+          <div className="landing-flat-card mt-12 overflow-hidden p-0">
+            {/* window chrome — illustrative, not interactive */}
+            <div className="pointer-events-none flex select-none items-center gap-3 border-b border-[var(--border-default)] px-4 py-3 sm:px-5">
               <div className="flex gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-[#e7e0d2]" />
-                <span className="h-3 w-3 rounded-full bg-[#e7e0d2]" />
-                <span className="h-3 w-3 rounded-full bg-[#e7e0d2]" />
+                <span className="h-3 w-3 rounded-full bg-[var(--border-strong)]" />
+                <span className="h-3 w-3 rounded-full bg-[var(--border-strong)]" />
+                <span className="h-3 w-3 rounded-full bg-[var(--border-strong)]" />
               </div>
               <div className="mx-auto flex items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--bg-subtle)] px-3 py-1 text-[12px] text-[var(--text-muted)]">
                 <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--ember)" }} />
@@ -78,7 +78,7 @@ export function LandingShowcase() {
 
             <div className="grid lg:grid-cols-[200px_1fr]">
               {/* category rail */}
-              <aside className="hidden flex-col gap-1 border-r border-[var(--border-default)] p-4 lg:flex">
+              <aside className="pointer-events-none hidden select-none flex-col gap-1 border-r border-[var(--border-default)] p-4 lg:flex">
                 <span className="lp-eyebrow mb-2 px-2">Categories</span>
                 {FILTER_KEYS.map((key, i) => {
                   const cat = CATEGORIES[key]
@@ -87,7 +87,7 @@ export function LandingShowcase() {
                   return (
                     <div
                       key={key}
-                      className="flex items-center justify-between rounded-xl px-2.5 py-2 text-[13.5px] transition-colors"
+                      className="flex items-center justify-between rounded-xl px-2.5 py-2 text-[13px] transition-colors"
                       style={{
                         background: active ? "var(--bg-subtle)" : "transparent",
                         color: active ? "var(--text-primary)" : "var(--text-secondary)",
@@ -108,11 +108,11 @@ export function LandingShowcase() {
 
               {/* content */}
               <div className="p-4 sm:p-5">
-                {/* toolbar */}
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <div className="flex flex-1 items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--bg-subtle)] px-3.5 py-2.5 text-[13.5px] text-[var(--text-muted)]">
+                {/* toolbar — illustrative, not interactive */}
+                <div className="pointer-events-none flex select-none flex-wrap items-center gap-2.5">
+                  <div className="flex flex-1 items-center gap-2 rounded-full border border-[var(--border-default)] bg-[var(--bg-subtle)] px-3.5 py-2.5 text-[13px] text-[var(--text-muted)]">
                     <Search size={15} strokeWidth={1.8} />
-                    Search 521 resources across 12 schools…
+                    Search 521 resources across 4 schools…
                   </div>
                   <div className="flex items-center gap-2 rounded-full border border-[var(--border-default)] px-3.5 py-2.5 text-[13px] font-medium text-[var(--text-secondary)]">
                     <SlidersHorizontal size={14} strokeWidth={1.8} />
@@ -120,15 +120,15 @@ export function LandingShowcase() {
                   </div>
                 </div>
 
-                {/* status chips */}
-                <div className="mt-3 flex flex-wrap gap-2">
+                {/* status chips — illustrative, not interactive */}
+                <div className="pointer-events-none mt-3 flex select-none flex-wrap gap-2">
                   {["Available now", "Within 5 miles", "Excellent condition"].map((c, i) => (
                     <span
                       key={c}
                       className="rounded-full border px-3 py-1 text-[12px] font-medium tracking-[-0.01em]"
                       style={
                         i === 0
-                          ? { background: "var(--ember-wash)", color: "#b23a26", borderColor: "#f6cabd" }
+                          ? { background: "var(--ember-wash)", color: "var(--ember-on-wash)", borderColor: "var(--ember-wash-border)" }
                           : { borderColor: "var(--border-default)", color: "var(--text-secondary)" }
                       }
                     >
@@ -175,7 +175,7 @@ export function LandingShowcase() {
                   >
                     <Icon size={22} strokeWidth={1.6} style={{ color: "var(--text-primary)" }} />
                     <span
-                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold text-white"
+                      className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold text-[var(--stage)]"
                       style={{ background: "var(--ember)" }}
                     >
                       {i + 1}
@@ -185,7 +185,7 @@ export function LandingShowcase() {
                 <h3 className="mt-5 text-[18px] font-semibold tracking-[-0.025em] text-[var(--text-primary)]">
                   {s.title}
                 </h3>
-                <p className="mt-2 text-[14.5px] leading-[1.6] text-[var(--text-secondary)]">
+                <p className="mt-2 text-[14px] leading-[1.6] text-[var(--text-secondary)]">
                   {s.body}
                 </p>
               </Reveal>

@@ -437,7 +437,7 @@ export function ThemePullChain() {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerCancel}
-        aria-label="Dark mode"
+        aria-label={label}
         aria-pressed={isDark}
         title={label}
         className="group pointer-events-auto absolute left-0 top-0 flex h-9 w-9 cursor-grab touch-none select-none items-center justify-center rounded-full border border-[var(--border-default)] bg-[var(--bg-raised)] shadow-[0_6px_16px_-8px_rgba(20,19,15,0.45)] outline-none transition-[box-shadow] duration-300 active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-[var(--foreground)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] dark:shadow-[0_0_0_1px_rgba(255,106,77,0.35),0_8px_22px_-6px_rgba(255,106,77,0.5)]"

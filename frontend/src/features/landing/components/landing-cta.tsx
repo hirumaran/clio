@@ -21,6 +21,8 @@ const CREAM = "#faf6ef"
 /* The connected cast — illustrative sample district, consistent with the hero. */
 const CAST = ["Lincoln High", "Roosevelt Middle", "Jefferson High", "Edison Arts"]
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export function LandingCta() {
   const [email, setEmail] = useState("")
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle")
@@ -28,11 +30,18 @@ export function LandingCta() {
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!email || state === "loading") return
+    if (state === "loading") return
+    // Validate client-side first so an obvious typo gives instant feedback
+    // instead of a server round-trip.
+    if (!EMAIL_RE.test(email.trim())) {
+      setState("error")
+      setError("Please enter a valid email address.")
+      return
+    }
     setState("loading")
     const res = await submitContactForm({
       name: "",
-      email,
+      email: email.trim(),
       organization: "",
       role: "Landing — early access",
       message: "Requested early access from the landing page.",
@@ -40,8 +49,9 @@ export function LandingCta() {
     if (res.ok) {
       setState("done")
     } else {
+      // Never surface raw server/error codes to a marketing visitor.
       setState("error")
-      setError(res.error ?? "Something went wrong.")
+      setError("Something went wrong — please try again in a moment.")
     }
   }
 
@@ -134,7 +144,7 @@ export function LandingCta() {
                       className="flex h-6 w-6 items-center justify-center rounded-full"
                       style={{ background: "var(--ember)" }}
                     >
-                      <Check size={14} strokeWidth={2.5} className="text-white" />
+                      <Check size={14} strokeWidth={2.5} className="text-[var(--stage)]" />
                     </span>
                     You&apos;re on the list — we&apos;ll be in touch shortly.
                   </div>
@@ -150,7 +160,7 @@ export function LandingCta() {
                           if (state === "error") setState("idle")
                         }}
                         placeholder="you@school.edu"
-                        className="h-12 flex-1 rounded-full border border-[rgba(250,246,239,0.16)] bg-[rgba(250,246,239,0.05)] px-5 text-[15px] outline-none placeholder:text-[rgba(250,246,239,0.4)] focus:border-[var(--ember)] sm:h-10 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:focus:border-0"
+                        className="h-12 flex-1 rounded-full border border-[rgba(250,246,239,0.16)] bg-[rgba(250,246,239,0.05)] px-5 text-[15px] outline-none placeholder:text-[rgba(250,246,239,0.6)] focus:border-[var(--ember)] sm:h-10 sm:rounded-none sm:border-0 sm:bg-transparent sm:px-0 sm:focus:border-0"
                         style={{ color: CREAM }}
                         aria-label="Work email"
                         aria-invalid={state === "error"}
@@ -159,9 +169,10 @@ export function LandingCta() {
                       <motion.button
                         type="submit"
                         disabled={state === "loading"}
-                        whileHover={{ y: -1 }}
-                        whileTap={{ y: 0 }}
-                        className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-medium tracking-[-0.01em] text-white transition-[filter] hover:brightness-95 disabled:opacity-70 sm:h-11"
+                        aria-busy={state === "loading"}
+                        whileHover={state === "loading" ? undefined : { y: -1 }}
+                        whileTap={state === "loading" ? undefined : { y: 0 }}
+                        className="group inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-medium tracking-[-0.01em] text-[var(--stage)] transition-[filter] hover:brightness-95 disabled:opacity-70 sm:h-11"
                         style={{ background: "var(--ember)" }}
                       >
                         {state === "loading" ? (
@@ -202,8 +213,8 @@ export function LandingCta() {
                     now
                   </span>
                 </div>
-                <p className="mt-4 text-[13px]" style={{ color: "rgba(250,246,239,0.5)" }}>
-                  Built for drama teachers · No setup fees · District-ready in a day
+                <p className="mt-4 text-[13px]" style={{ color: "rgba(250,246,239,0.55)" }}>
+                  Built for drama teachers · No setup fees · No contracts
                 </p>
               </StaggerItem>
             </Stagger>

@@ -32,7 +32,7 @@ function SpotlightCard({
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className={cn("landing-float-card landing-lift relative isolate overflow-hidden", className)}
+      className={cn("landing-flat-card relative isolate overflow-hidden", className)}
     >
       <motion.div
         aria-hidden
@@ -105,7 +105,7 @@ function UtilizationChart() {
           <span className="lp-tnum text-[40px] font-semibold leading-none tracking-[-0.03em] text-[var(--text-primary)]">
             <CountUp value="43" />%
           </span>
-          <span className="mb-1 inline-flex items-center gap-1 text-[13px] font-medium text-[#2f7d4f]">
+          <span className="mb-1 inline-flex items-center gap-1 text-[13px] font-medium text-[var(--status-ok-fg)]">
             <TrendingUp size={14} strokeWidth={2} /> this year
           </span>
         </div>
@@ -156,9 +156,9 @@ export function LandingAnalytics() {
           </Reveal>
           <Reveal delay={0.1}>
             <p className="mt-6 text-[17px] leading-[1.65] text-[var(--text-secondary)]">
-              Clio turns thousands of loans into a clear picture — utilization, peak
+              Clio turns every loan into a clear picture — utilization, peak
               seasons, and fulfillment trends that help teachers plan and help districts
-              prove the program pays for itself.
+              make the case at budget time.
             </p>
           </Reveal>
         </div>
@@ -192,13 +192,17 @@ export function LandingAnalytics() {
                       <CountUp value={s.value} />
                       {s.suffix && <span className="text-[18px] font-medium">{s.suffix}</span>}
                     </div>
-                    <p className="mt-2 text-[13.5px] leading-snug text-[var(--text-muted)]">{s.label}</p>
+                    <p className="mt-2 text-[13px] leading-snug text-[var(--text-muted)]">{s.label}</p>
                   </div>
                 </SpotlightCard>
               </Reveal>
             )
           })}
         </div>
+
+        <p className="mt-6 text-[12px] tracking-[-0.01em] text-[var(--text-muted)]">
+          Charts and figures shown are illustrative sample data.
+        </p>
       </Container>
     </Section>
   )

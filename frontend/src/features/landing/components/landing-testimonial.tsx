@@ -42,7 +42,7 @@ export function LandingTestimonial() {
         <div className="mt-10 grid gap-4 lg:grid-cols-12">
           {/* Feature quote */}
           <Reveal delay={0.05} className="lg:col-span-7">
-            <figure className="landing-float-card flex h-full flex-col justify-between p-8 sm:p-10">
+            <figure className="landing-flat-card flex h-full flex-col justify-between p-8 sm:p-10">
               <span
                 className="text-[64px] font-semibold leading-[0.5]"
                 style={{ color: "var(--ember)" }}
@@ -56,7 +56,7 @@ export function LandingTestimonial() {
               <figcaption className="mt-8 flex items-center gap-3">
                 <SchoolDot name={FEATURE.name} size={36} />
                 <div>
-                  <div className="text-[14.5px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+                  <div className="text-[14px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
                     {FEATURE.name}
                   </div>
                   <div className="text-[13px] text-[var(--text-muted)]">{FEATURE.role}</div>
@@ -69,14 +69,14 @@ export function LandingTestimonial() {
           <div className="grid gap-4 lg:col-span-5">
             {SUPPORTING.map((t, i) => (
               <Reveal key={t.name} delay={0.1 + i * 0.08}>
-                <figure className="landing-float-card flex flex-col p-6">
+                <figure className="landing-flat-card flex flex-col p-6">
                   <blockquote className="text-[15px] leading-[1.55] tracking-[-0.01em] text-[var(--text-secondary)]">
                     {t.quote}
                   </blockquote>
                   <figcaption className="mt-5 flex items-center gap-2.5">
                     <SchoolDot name={t.name} size={30} />
                     <div>
-                      <div className="text-[13.5px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
+                      <div className="text-[13px] font-semibold tracking-[-0.01em] text-[var(--text-primary)]">
                         {t.name}
                       </div>
                       <div className="text-[12px] text-[var(--text-muted)]">{t.role}</div>

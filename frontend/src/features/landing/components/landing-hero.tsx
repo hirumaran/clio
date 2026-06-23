@@ -1,8 +1,9 @@
+import { useRef } from "react"
 import { motion } from "framer-motion"
 import { ArrowRight } from "lucide-react"
 import { DotPattern } from "@/registry/aliimam/components/dot-pattern"
 import { Container, Button } from "./landing-primitives"
-import { ScrollCue } from "./landing-motion"
+import { HeroScrollStroke } from "./landing-motion"
 import { ResourceCard, Float, SchoolDot, type Resource } from "./landing-ui"
 
 const EASE = [0.22, 1, 0.36, 1] as const
@@ -60,8 +61,9 @@ const HERO_CARDS: { resource: Resource; style: string; float: number; delay: num
 ]
 
 export function LandingHero() {
+  const headerRef = useRef<HTMLElement>(null)
   return (
-    <header className="relative overflow-hidden pt-32 sm:pt-40 lg:pt-44">
+    <header ref={headerRef} className="relative overflow-hidden pt-32 sm:pt-40 lg:pt-44">
       {/* Warm, radially-faded dot texture behind the hero */}
       <DotPattern
         width={22}
@@ -69,7 +71,7 @@ export function LandingHero() {
         cx={1}
         cy={1}
         cr={1.2}
-        className="z-0 fill-[var(--foreground)]/[0.08] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_30%,#000_0%,transparent_72%)]"
+        className="z-0 fill-[var(--dot-grid)] [mask-image:radial-gradient(ellipse_75%_65%_at_50%_30%,#000_0%,transparent_72%)]"
       />
       <Container className="relative z-10">
         <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
@@ -213,7 +215,7 @@ export function LandingHero() {
         </div>
       </Container>
 
-      <ScrollCue className="mt-16 sm:mt-20" />
+      <HeroScrollStroke targetRef={headerRef} className="mt-16 sm:mt-20" />
     </header>
   )
 }

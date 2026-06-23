@@ -4,6 +4,7 @@ import {
   useEffect,
   type ReactNode,
   type ElementType,
+  type RefObject,
 } from "react"
 import {
   motion,
@@ -35,34 +36,50 @@ export function ScrollProgress() {
 }
 
 /* ──────────────────────────────────────────────────────────────
-   ScrollCue — a stage-light scroll hint. A faint vertical track with an
-   ember light travelling down it on a loop; the whole cue fades and lifts
-   away over the first stretch of scroll, so it does its job then vanishes
-   instead of lingering as static "SCROLL ↓" chrome.
+   HeroScrollStroke — the scroll affordance, drawn instead of stated.
+   A hand-drawn ember flourish (the same motif as the underline beneath
+   "owns.") whose stroke reveals along its route as the hero scrolls past:
+   pathLength is driven by the hero's own scroll progress and springed for
+   momentum, so the line literally follows the reader down the page. A faint
+   ghost track shows where it's headed; a small "Scroll" eyebrow fades once
+   they engage. The whole thing stays an anchor to the first section, so it
+   keeps the original tap-to-scroll job. Under reduced motion the stroke is
+   simply drawn in full and held static.
    ────────────────────────────────────────────────────────────── */
-export function ScrollCue({
+const HERO_STROKE_PATH =
+  "M40 120 C150 120 200 70 320 78 C420 84 470 124 560 120 C600 120 720 40 700 30 C685 22 600 22 590 40 C575 70 660 122 720 120 C800 118 850 78 950 84 C1040 90 1090 116 1160 110"
+
+export function HeroScrollStroke({
+  targetRef,
   href = "#proof",
   className = "",
 }: {
+  /** The hero <header>; its scroll-out drives how far the stroke is drawn. */
+  targetRef: RefObject<HTMLElement | null>
   href?: string
   className?: string
 }) {
   const reduce = useReducedMotion()
-  const { scrollY } = useScroll()
-  // Dissolve the cue over the first ~200px of scroll — once they've engaged,
-  // the affordance has done its job.
-  const opacity = useTransform(scrollY, [0, 200], [1, 0])
-  const lift = useTransform(scrollY, [0, 200], [0, 10])
+  // 0 at the top of the page → 1 once the hero has scrolled fully past the top.
+  const { scrollYProgress } = useScroll({
+    target: targetRef,
+    offset: ["start start", "end start"],
+  })
+  // Front-load the draw into the first ~65% of that travel so the line
+  // completes while still on screen; rest ~18% drawn as a standing invitation.
+  const drawn = useTransform(scrollYProgress, [0, 0.65], [0.18, 1])
+  const pathLength = useSpring(drawn, { stiffness: 90, damping: 28, mass: 0.4 })
+  const labelOpacity = useTransform(scrollYProgress, [0, 0.12], [1, 0])
 
   return (
     <motion.a
       href={href}
       aria-label="Scroll to content"
-      style={{ opacity, y: lift }}
-      className={`relative z-10 mx-auto flex w-fit flex-col items-center gap-3 text-[var(--text-muted)] ${className}`}
+      className={`relative z-10 mx-auto block w-full max-w-[560px] ${className}`}
     >
       <motion.span
-        className="lp-eyebrow"
+        className="lp-eyebrow block text-center text-[var(--text-muted)]"
+        style={reduce ? undefined : { opacity: labelOpacity }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.85 }}
         transition={{ delay: 1.1, duration: 0.8 }}
@@ -70,22 +87,35 @@ export function ScrollCue({
         Scroll
       </motion.span>
 
-      <span className="relative h-10 w-px overflow-hidden rounded-full bg-[var(--border-strong)]">
-        <motion.span
-          className="absolute inset-x-0 top-0 h-3 rounded-full bg-[var(--ember)]"
-          initial={reduce ? { y: 4, opacity: 1 } : { y: -14, opacity: 0 }}
-          animate={
-            reduce
-              ? { y: 4, opacity: 1 }
-              : { y: [-14, -4, 34, 44], opacity: [0, 1, 1, 0] }
-          }
-          transition={
-            reduce
-              ? undefined
-              : { duration: 1.8, repeat: Infinity, ease: "easeInOut", times: [0, 0.2, 0.8, 1] }
-          }
+      <svg
+        viewBox="0 0 1200 144"
+        fill="none"
+        aria-hidden="true"
+        className="mt-3 h-auto w-full overflow-visible"
+      >
+        {/* ghost track — the line's full route, faint */}
+        <path
+          d={HERO_STROKE_PATH}
+          stroke="var(--border-strong)"
+          strokeWidth={6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity={0.5}
         />
-      </span>
+        {/* ember stroke — reveals along the route with scroll */}
+        <motion.path
+          d={HERO_STROKE_PATH}
+          stroke="var(--ember)"
+          strokeWidth={8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{
+            pathLength: reduce ? 1 : pathLength,
+            filter:
+              "drop-shadow(0 1px 6px color-mix(in srgb, var(--ember) 45%, transparent))",
+          }}
+        />
+      </svg>
     </motion.a>
   )
 }

@@ -410,6 +410,11 @@
   --border-subtle: #efe9dd;
   --border-strong: #d8cfbd;
 
+  /* Background dot-grid texture (hero). Tuned per-theme so it reads on both
+     the cream canvas and the warm-dark stage instead of using a flat
+     foreground alpha that disappears against near-black. */
+  --dot-grid: rgba(20, 19, 15, 0.08);   /* warm obsidian on cream */
+
   /* ── Semantic layer ──
      Category tints, status colors, on-ember-wash ink, and the card hover
      scrim. Components MUST route through these instead of baking light hex,
@@ -612,6 +617,9 @@
   --border-default: #322d24;   /* warm hairline on dark */
   --border-subtle: #26221b;
   --border-strong: #443d30;
+
+  /* Brighter cream alpha so the dot texture stays visible on the dark stage. */
+  --dot-grid: rgba(244, 239, 229, 0.16);   /* warm cream on near-black */
 
   /* ── Semantic layer — dark counterparts (mirror the light set above) ── */
   --cat-costumes: #2a241c;

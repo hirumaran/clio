@@ -38,6 +38,7 @@ export function LandingNav() {
 
   return (
     <div className="fixed inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
+      <GlassFilter />
       <AnimatePresence>
         {open && (
           <motion.div
@@ -76,14 +77,23 @@ export function LandingNav() {
               className="relative rounded-full px-3.5 py-2 text-[14px] font-medium tracking-[-0.01em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--foreground)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]"
               style={{ color: active === l.id ? "var(--text-primary)" : "var(--text-muted)" }}
             >
-              {l.label}
               {active === l.id && (
                 <motion.span
-                  layoutId="nav-dot"
-                  className="absolute -bottom-0.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full"
-                  style={{ background: "var(--ember)" }}
-                />
+                  layoutId="nav-spot"
+                  aria-hidden
+                  transition={{ type: "spring", stiffness: 400, damping: 34 }}
+                  className="lp-glass pointer-events-none absolute inset-y-0 -inset-x-1 z-0 overflow-hidden rounded-full"
+                >
+                  {/* frosted base — works everywhere */}
+                  <span className="absolute inset-0 backdrop-blur-[2px] backdrop-saturate-[1.4]" />
+                  {/* liquid refraction — Chromium; no-op where url() backdrop is unsupported */}
+                  <span
+                    className="absolute inset-0"
+                    style={{ backdropFilter: 'url("#clio-glass")', WebkitBackdropFilter: 'url("#clio-glass")' }}
+                  />
+                </motion.span>
               )}
+              <span className="relative z-10">{l.label}</span>
             </a>
           ))}
         </div>
@@ -145,5 +155,42 @@ export function LandingNav() {
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+/* SVG displacement filter behind the active-item glass lens — turbulent noise
+   blurred, then used to displace the backdrop, which reads as liquid refraction.
+   Tuned small (low scale) for a ~pill-sized lens. Referenced by id, so it's
+   rendered once. Sized 0 (not display:none) so the filter region stays valid. */
+function GlassFilter() {
+  return (
+    <svg aria-hidden className="pointer-events-none absolute h-0 w-0">
+      <defs>
+        <filter
+          id="clio-glass"
+          x="-20%"
+          y="-20%"
+          width="140%"
+          height="140%"
+          colorInterpolationFilters="sRGB"
+        >
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.014 0.014"
+            numOctaves="2"
+            seed="7"
+            result="noise"
+          />
+          <feGaussianBlur in="noise" stdDeviation="1.4" result="blurred" />
+          <feDisplacementMap
+            in="SourceGraphic"
+            in2="blurred"
+            scale="18"
+            xChannelSelector="R"
+            yChannelSelector="G"
+          />
+        </filter>
+      </defs>
+    </svg>
   )
 }

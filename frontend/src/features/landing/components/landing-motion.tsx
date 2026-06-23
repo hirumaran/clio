@@ -35,6 +35,62 @@ export function ScrollProgress() {
 }
 
 /* ──────────────────────────────────────────────────────────────
+   ScrollCue — a stage-light scroll hint. A faint vertical track with an
+   ember light travelling down it on a loop; the whole cue fades and lifts
+   away over the first stretch of scroll, so it does its job then vanishes
+   instead of lingering as static "SCROLL ↓" chrome.
+   ────────────────────────────────────────────────────────────── */
+export function ScrollCue({
+  href = "#proof",
+  className = "",
+}: {
+  href?: string
+  className?: string
+}) {
+  const reduce = useReducedMotion()
+  const { scrollY } = useScroll()
+  // Dissolve the cue over the first ~200px of scroll — once they've engaged,
+  // the affordance has done its job.
+  const opacity = useTransform(scrollY, [0, 200], [1, 0])
+  const lift = useTransform(scrollY, [0, 200], [0, 10])
+
+  return (
+    <motion.a
+      href={href}
+      aria-label="Scroll to content"
+      style={{ opacity, y: lift }}
+      className={`relative z-10 mx-auto flex w-fit flex-col items-center gap-3 text-[var(--text-muted)] ${className}`}
+    >
+      <motion.span
+        className="lp-eyebrow"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.85 }}
+        transition={{ delay: 1.1, duration: 0.8 }}
+      >
+        Scroll
+      </motion.span>
+
+      <span className="relative h-10 w-px overflow-hidden rounded-full bg-[var(--border-strong)]">
+        <motion.span
+          className="absolute inset-x-0 top-0 h-3 rounded-full bg-[var(--ember)]"
+          initial={reduce ? { y: 4, opacity: 1 } : { y: -14, opacity: 0 }}
+          animate={
+            reduce
+              ? { y: 4, opacity: 1 }
+              : { y: [-14, -4, 34, 44], opacity: [0, 1, 1, 0] }
+          }
+          transition={
+            reduce
+              ? undefined
+              : { duration: 1.8, repeat: Infinity, ease: "easeInOut", times: [0, 0.2, 0.8, 1] }
+          }
+        />
+      </span>
+    </motion.a>
+  )
+}
+
+/* ──────────────────────────────────────────────────────────────
    Magnetic — pulls its child toward the cursor on hover, springs
    back on leave. Disabled under reduced-motion + on touch.
    ────────────────────────────────────────────────────────────── */

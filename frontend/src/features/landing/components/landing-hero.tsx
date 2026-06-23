@@ -1,7 +1,8 @@
 import { motion } from "framer-motion"
-import { ArrowRight, ArrowDown } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { DotPattern } from "@/registry/aliimam/components/dot-pattern"
 import { Container, Button } from "./landing-primitives"
+import { ScrollCue } from "./landing-motion"
 import { ResourceCard, Float, SchoolDot, type Resource } from "./landing-ui"
 
 const EASE = [0.22, 1, 0.36, 1] as const
@@ -212,23 +213,7 @@ export function LandingHero() {
         </div>
       </Container>
 
-      {/* scroll cue */}
-      <motion.a
-        href="#proof"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.4 }}
-        className="relative z-10 mx-auto mt-16 flex w-fit flex-col items-center gap-2 text-[var(--text-muted)] sm:mt-20"
-        aria-label="Scroll down"
-      >
-        <span className="lp-eyebrow">Scroll</span>
-        <motion.span
-          animate={{ y: [0, 5, 0] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ArrowDown size={16} strokeWidth={1.5} />
-        </motion.span>
-      </motion.a>
+      <ScrollCue className="mt-16 sm:mt-20" />
     </header>
   )
 }

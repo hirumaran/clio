@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { Container } from "./landing-primitives"
-import { Wordmark } from "./landing-brand"
+import { Wordmark, ClioGrid } from "./landing-brand"
 
 const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
   {
@@ -69,6 +69,11 @@ export function LandingFooter() {
               </ul>
             </div>
           ))}
+        </div>
+
+        {/* brand signature — the name as a full-width marquee of stage lights */}
+        <div className="mt-20">
+          <ClioGrid />
         </div>
 
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-[var(--border-default)] pt-6 sm:flex-row sm:items-center">

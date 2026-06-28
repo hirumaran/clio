@@ -829,3 +829,154 @@ html:not(.dark) .bulb-floor {
 .bulb-clunk {
   animation: bulbClunk 170ms ease-out;
 }
+
+/* ─── Auth screens — "Stage Door" obsidian theme ───────────────────────────
+   The auth flow (login / signup / forgot-password) used to render in the
+   generic indigo shadcn palette, which read as a different product from the
+   cinematic landing page. This scoped theme closes that gap: an always-dark
+   obsidian stage with one signal-red accent, the editorial Inter type, tight
+   tracking, pill geometry, and hairline borders — the same design language as
+   the landing, in its house-lights-down register. Tokens are namespaced
+   (--av-*) and the theme is unconditional (it does NOT follow html.dark), so
+   the auth screens stay obsidian regardless of the app's light/dark setting
+   and never leak into the rest of the app. */
+.auth-root {
+  --av-stage: #070708;        /* deepest panel — the brand stage (left) */
+  --av-canvas: #0a0a0b;       /* obsidian canvas — the form panel (right) */
+  --av-surface: #161618;      /* inputs / social buttons */
+  --av-surface-hover: #1d1d20;
+  --av-text: #ffffff;         /* pure white — loudest tier */
+  --av-text-secondary: #cdcdcd; /* ash — body copy */
+  --av-muted: #8b8b91;        /* graphite-light — labels / placeholders (>=4.5:1 on obsidian) */
+  --av-border: rgba(255, 255, 255, 0.1);
+  --av-border-strong: rgba(255, 255, 255, 0.2);
+  --av-red: #fc1c46;          /* signal red — the sole chromatic note */
+  --av-red-bright: #ff3a5e;
+  --av-on-red: #0a0a0b;       /* obsidian ink on the red pill (≈5:1 vs white-on-red's 3.8:1) */
+  --av-focus: color-mix(in srgb, var(--av-red) 24%, transparent);
+
+  /* Bridge the app/base tokens used by the global stylesheet so the keyboard
+     focus ring and default border-color match the obsidian theme. */
+  --ring: var(--av-red);
+  --border-default: var(--av-border);
+
+  background: var(--av-canvas);
+  color: var(--av-text-secondary);
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Headings drop the global Lora serif for the system's sole sans typeface. */
+.auth-root h1,
+.auth-root h2,
+.auth-root h3,
+.auth-root h4 {
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  color: var(--av-text);
+  letter-spacing: -0.035em;
+  line-height: 1.04;
+}
+
+/* Editorial micro-label — uppercase, widely tracked, with an ember tick. */
+.auth-root .av-eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--av-muted);
+}
+
+/* Pill text field — carbon surface, hairline rim, signal-red focus. */
+.auth-field {
+  width: 100%;
+  height: 50px;
+  border-radius: 9999px;
+  background: var(--av-surface);
+  border: 1px solid var(--av-border);
+  color: var(--av-text);
+  padding: 0 20px;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.auth-field::placeholder {
+  color: var(--av-muted);
+}
+.auth-field:hover {
+  border-color: var(--av-border-strong);
+}
+.auth-field:focus {
+  outline: none;
+  border-color: var(--av-red);
+  box-shadow: 0 0 0 3px var(--av-focus);
+  background: var(--av-surface-hover);
+}
+.auth-field:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.auth-label {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--av-text-secondary);
+}
+
+/* Primary action — the one red element. Obsidian ink keeps AA contrast. */
+.auth-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 50px;
+  border-radius: 9999px;
+  background: var(--av-red);
+  color: var(--av-on-red);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: filter 0.18s ease;
+}
+.auth-btn:hover {
+  filter: brightness(1.06);
+}
+.auth-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Secondary / SSO — outlined obsidian pill. */
+.auth-social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  width: 100%;
+  border-radius: 9999px;
+  background: var(--av-surface);
+  border: 1px solid var(--av-border);
+  color: var(--av-text);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.auth-social:hover {
+  background: var(--av-surface-hover);
+  border-color: var(--av-border-strong);
+}
+.auth-social:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-link {
+  color: var(--av-red);
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+.auth-link:hover {
+  color: var(--av-red-bright);
+}
